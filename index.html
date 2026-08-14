@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Socratic AI Tutoring — workshop materials</title>
+<meta name="description" content="Materials from the Socratic AI Tutoring workshop: slides, worksheet, and a sample coach prompt you can copy and run.">
+<style>
+  :root{
+    --ink:#1a1613; --crimson:#9A0100; --cream:#FFF8E1; --teal:#0F6E7E;
+    --gold:#956C09; --slate:#4A6B7C; --paper:#FDFBF5; --rule:#e3ddcd;
+    --display:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:#efe9dc; color:var(--ink); font-family:var(--sans);
+       font-size:17px; line-height:1.55}
+  .wrap{max-width:46rem; margin:0 auto; background:var(--paper);
+        min-height:100vh; box-shadow:0 0 2.5rem rgba(0,0,0,.10)}
+
+  header{background:var(--crimson); color:var(--cream); padding:2.4rem 2rem 2rem}
+  header .kicker{font-size:.78rem; letter-spacing:.16em; text-transform:uppercase;
+                 font-weight:700; color:#f3d9d5; margin-bottom:.5rem}
+  header h1{font-family:var(--display); font-weight:400; font-size:2.6rem;
+            line-height:1.05; margin:0 0 .7rem}
+  header p{margin:0; color:#f7e6e3; font-size:1.05rem; max-width:34rem}
+  .held{height:4px; width:5.5rem; background:var(--cream); margin:1rem 0 1.1rem; border-radius:2px}
+
+  main{padding:2rem}
+  h2{font-family:var(--display); font-weight:400; font-size:1.65rem;
+     margin:2.6rem 0 .5rem; color:var(--crimson)}
+  h2:first-child{margin-top:0}
+  p{margin:0 0 1rem}
+  .lede{font-size:1.05rem; color:var(--slate)}
+
+  .card{display:block; text-decoration:none; color:inherit;
+        border:1px solid var(--rule); border-left:6px solid var(--teal);
+        background:#fff; padding:1.1rem 1.3rem; margin:0 0 .9rem;
+        transition:transform .12s ease, box-shadow .12s ease}
+  .card:hover{transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,.08)}
+  .card:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
+  .card.c{border-left-color:var(--crimson)}
+  .card.g{border-left-color:var(--gold)}
+  .card .t{font-family:var(--display); font-size:1.35rem; line-height:1.15; color:var(--crimson)}
+  .card .d{font-size:.97rem; color:var(--slate); margin-top:.3rem}
+  .card .go{font-size:.8rem; font-weight:700; letter-spacing:.1em;
+            text-transform:uppercase; color:var(--teal); margin-top:.6rem}
+
+  .note{background:var(--cream); border-left:5px solid var(--gold);
+        padding:1rem 1.2rem; margin:1.4rem 0}
+  .note p:last-child{margin-bottom:0}
+  .note b{color:var(--gold)}
+
+  .steps{counter-reset:s; list-style:none; padding:0; margin:1rem 0}
+  .steps li{counter-increment:s; position:relative; padding-left:2.6rem; margin-bottom:1rem}
+  .steps li::before{content:counter(s); position:absolute; left:0; top:.05rem;
+    width:1.8rem; height:1.8rem; border-radius:50%; background:var(--crimson); color:#fff;
+    font-weight:700; font-size:.95rem; display:flex; align-items:center; justify-content:center}
+  .steps b{display:block}
+
+  .pill{display:inline-block; background:#fdf2c8; border-bottom:2px dotted var(--gold);
+        padding:0 .3rem; font-weight:600}
+
+  footer{border-top:1px solid var(--rule); margin-top:3rem; padding:1.6rem 2rem 3rem;
+         color:var(--slate); font-size:.92rem}
+  footer a{color:var(--teal)}
+
+  @media (max-width:600px){
+    header{padding:1.8rem 1.2rem 1.6rem} header h1{font-size:2.1rem}
+    main{padding:1.4rem 1.2rem} footer{padding:1.4rem 1.2rem 2.5rem}
+  }
+  @media (prefers-reduced-motion:reduce){.card{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">Faculty workshop · SAC &amp; SCC</div>
+  <h1>Socratic AI Tutoring</h1>
+  <div class="held"></div>
+  <p>Designing AI conversations students can't finish without doing the thinking themselves.</p>
+</header>
+
+<main>
+
+<p class="lede">Everything from the session is here. Nothing needs an account, and nothing expires. If you're finding this page cold — you didn't miss anything you can't pick up from the worksheet.</p>
+
+<h2>Start here</h2>
+
+<a class="card c" href="worksheet.html">
+  <div class="t">Build one — the worksheet</div>
+  <div class="d">Two parts. The first is four questions and takes five minutes; press the button at the end and it assembles a working prompt you can paste into a chatbot. The second part is the harder, better one. Six filled-in examples at the bottom if you're stuck.</div>
+  <div class="go">Open the worksheet →</div>
+</a>
+
+<a class="card" href="prompt.html">
+  <div class="t">The sample coach prompt</div>
+  <div class="d">The one we used in the session. Copy it, paste it into any chatbot, and be the student for ten minutes. About three hundred words of plain English — that's the whole tutor.</div>
+  <div class="go">Copy the prompt →</div>
+</a>
+
+<div class="note">
+  <p><b>You don't need an account to try this.</b> <b style="color:var(--ink)">chatgpt.com</b> and <b style="color:var(--ink)">gemini.google.com</b> both open without signing up. Fine for testing your own prompt and making up practice conversations.</p>
+  <p><b>For anything a student actually writes, use Nectir</b> — it's free, it's approved for student work, and you write the prompt on the instructor side. It doesn't need Canvas or any LMS.</p>
+  <p><span class="pill">[Nectir interest form link goes here]</span> — about two minutes, and the account takes a few days.</p>
+</div>
+
+<h2>From the session</h2>
+
+<a class="card g" href="deck.html">
+  <div class="t">The slides</div>
+  <div class="d">The whole deck, in your browser. Arrow keys to move, or press <b>?</b> for the rest of the shortcuts.</div>
+  <div class="go">Open the slides →</div>
+</a>
+
+<div class="card g" style="cursor:default">
+  <div class="t">The recording</div>
+  <div class="d"><span class="pill">[recording link goes here once it's posted]</span></div>
+</div>
+
+<h2>The follow-up clinic</h2>
+
+<p><b>Friday, August 28 · 2–4 p.m.</b> Small group, drop in and out as you need.</p>
+
+<p>Bring your worksheet and whatever happened when you tried it — <em>especially</em> if it went badly. That's the more useful kind. Nothing to prepare.</p>
+
+<p><span class="pill">[clinic Zoom link goes here]</span></p>
+
+<p>If your Nectir account hasn't come through yet, come anyway.</p>
+
+<h2>The three things</h2>
+
+<p>If you remember nothing else from the session:</p>
+
+<ol class="steps">
+  <li><b>Say what the conversation should produce.</b> It ends when a thing exists — not when the student runs out of steam.</li>
+  <li><b>Tell it what to do with each kind of answer.</b> A prompt that reacts is a chatbot. A prompt that sorts is a teacher.</li>
+  <li><b>Tell it to take a good answer when it gets one.</b> The most common failure isn't being too easy. It's being too relentless.</li>
+</ol>
+
+<h2>Two things worth knowing before you use it with students</h2>
+
+<p><b>Somebody will eventually tell it something serious.</b> If the hard thing is the subject of the work — something they lived through and are writing about — one warm sentence, then keep coaching. If it's about right now, stop coaching, stay warm, don't probe, and name a person. And put the real offices and phone numbers in the prompt itself; left to improvise, it will invent plausible wrong ones.</p>
+
+<p><b>Real student writing goes only through the approved tool.</b> When you're testing your own prompt, make up the student answers yourself. Taking the name off isn't enough — a paragraph about someone's family, or the field they're going into, identifies them without it.</p>
+
+<div class="note">
+  <p><b>There's no next level you have to reach.</b> If all you ever do is write down three wrong answers and one question for each, and ask those questions yourself in class, you've got the whole idea. The chatbot is a way to do it thirty times at once. It isn't the point.</p>
+</div>
+
+</main>
+
+<footer>
+  <p><span class="pill">[your name]</span> · Santa Ana College School of Continuing Education<br>
+  <span class="pill">[your email]</span></p>
+  <p>Send me what you have and what it's doing — especially if it's doing something strange. Being stuck is the normal middle part.</p>
+</footer>
+
+</div>
+</body>
+</html>

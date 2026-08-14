@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Socratic AI Tutoring — Workshop Deck</title>
+<style>
+  :root{
+    --ink:#1a1613;
+    --crimson:#9A0100;
+    --cream:#FFF8E1;
+    --teal:#0F6E7E;
+    --gold:#956C09;
+    --slate:#4A6B7C;
+    --paper:#FDFBF5;
+    --rule:#e3ddcd;
+    --display:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --u:10px; /* set by JS = frame width / 100 */
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:#2b2724; color:var(--ink);
+    font-family:var(--sans);
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+
+  /* ---------- stage ---------- */
+  #stage{position:relative; width:100vw; height:100vh; display:flex; align-items:center; justify-content:center}
+  #frame{
+    position:relative;
+    width:min(100vw, calc(100vh * 16 / 9));
+    height:min(100vh, calc(100vw * 9 / 16));
+    background:var(--paper); overflow:hidden;
+  }
+  /* thin crimson spine — the through-line of the session */
+  #frame::before{content:""; position:absolute; left:0; top:0; bottom:0; width:calc(var(--u)*0.9); background:var(--crimson); z-index:5}
+
+  .slide{
+    display:none; position:absolute; inset:0;
+    padding:calc(var(--u)*7) calc(var(--u)*8) calc(var(--u)*8) calc(var(--u)*9);
+    flex-direction:column; justify-content:center;
+  }
+  .slide.on{display:flex; animation:rise .3s ease-out both}
+  @keyframes rise{from{opacity:0; transform:translateY(calc(var(--u)*1.2))} to{opacity:1; transform:none}}
+  @media (prefers-reduced-motion:reduce){.slide.on{animation:none}}
+
+  /* ---------- type ---------- */
+  .kicker{
+    font-size:calc(var(--u)*1.5); letter-spacing:.18em; text-transform:uppercase;
+    font-weight:700; color:var(--slate); margin-bottom:calc(var(--u)*2);
+  }
+  h1{font-family:var(--display); font-weight:400; font-size:calc(var(--u)*7.6); line-height:1.02; margin:0; color:var(--crimson)}
+  h2{font-family:var(--display); font-weight:400; font-size:calc(var(--u)*5.4); line-height:1.06; margin:0 0 calc(var(--u)*1.4)}
+  .stmt{font-family:var(--display); font-weight:400; font-size:calc(var(--u)*5.6); line-height:1.12; margin:0}
+  .stmt.sm{font-size:calc(var(--u)*4.2)}
+  .sub{font-size:calc(var(--u)*2.5); line-height:1.35; color:var(--slate); margin:calc(var(--u)*2.2) 0 0; max-width:78%}
+  .tiny{font-size:calc(var(--u)*1.8); color:var(--slate); margin-top:calc(var(--u)*2.4)}
+  em.hl{font-style:normal; color:var(--crimson)}
+  b.hl{color:var(--teal)}
+
+  /* the held rule — stops short of the edge. restraint, made visual. */
+  .held{height:calc(var(--u)*0.45); width:calc(var(--u)*14); background:var(--teal); margin:calc(var(--u)*1.8) 0 calc(var(--u)*2.6); border-radius:2px}
+  .held.gold{background:var(--gold)}
+
+  /* ---------- blocks ---------- */
+  .lines{list-style:none; padding:0; margin:0}
+  .lines li{
+    font-family:var(--display); font-size:calc(var(--u)*3.5); line-height:1.25;
+    margin:0 0 calc(var(--u)*1.5); padding-left:calc(var(--u)*2.4); position:relative;
+  }
+  .lines li::before{content:""; position:absolute; left:0; top:calc(var(--u)*1.5); width:calc(var(--u)*1.2); height:calc(var(--u)*0.3); background:var(--gold)}
+  .lines.tight li{font-size:calc(var(--u)*2.9); margin-bottom:calc(var(--u)*1.1)}
+
+  .rows{display:flex; flex-direction:column; gap:calc(var(--u)*1.6)}
+  .row{border-left:calc(var(--u)*0.5) solid var(--teal); padding:calc(var(--u)*1.1) 0 calc(var(--u)*1.1) calc(var(--u)*2)}
+  .row.c{border-left-color:var(--crimson)}
+  .row.g{border-left-color:var(--gold)}
+  .row .rl{font-family:var(--display); font-size:calc(var(--u)*3.1); line-height:1.15}
+  .row .rt{font-size:calc(var(--u)*2.1); color:var(--slate); margin-top:calc(var(--u)*0.5); line-height:1.35}
+
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:calc(var(--u)*4)}
+  .card{background:var(--cream); border-left:calc(var(--u)*0.6) solid var(--crimson); padding:calc(var(--u)*2.6)}
+  .card p{font-family:var(--display); font-size:calc(var(--u)*3.1); line-height:1.2; margin:0}
+
+  /* dialogue — the deck's content-derived device */
+  .ex{display:flex; flex-direction:column; gap:calc(var(--u)*1.4); margin:calc(var(--u)*1) 0}
+  .turn{padding:calc(var(--u)*1.2) calc(var(--u)*2); border-left:calc(var(--u)*0.5) solid var(--slate); background:#fff}
+  .turn.coach{border-left-color:var(--teal); background:#f4f8f8}
+  .turn .who{font-size:calc(var(--u)*1.4); letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:var(--slate); margin-bottom:calc(var(--u)*0.4)}
+  .turn.coach .who{color:var(--teal)}
+  .turn p{margin:0; font-size:calc(var(--u)*2.4); line-height:1.3}
+  .verdict{font-family:var(--display); font-size:calc(var(--u)*3.2); line-height:1.2; margin-top:calc(var(--u)*2); color:var(--crimson)}
+
+  .paste{
+    font-family:var(--mono); font-size:calc(var(--u)*2.2); line-height:1.45;
+    background:#26221f; color:#f4efe4; padding:calc(var(--u)*2.4); border-radius:calc(var(--u)*0.4);
+  }
+  .shot{
+    border:1px solid var(--rule); background:#fff; padding:calc(var(--u)*2);
+    font-family:var(--mono); font-size:calc(var(--u)*1.75); line-height:1.5; color:#3a342e;
+    max-height:calc(var(--u)*40); overflow:hidden;
+  }
+  .shot .mark{background:#fdf2c8; box-shadow:0 0 0 2px #fdf2c8}
+  .ph{
+    border:calc(var(--u)*0.3) dashed var(--gold); background:#fdf6df;
+    padding:calc(var(--u)*2.4); font-size:calc(var(--u)*2.1); color:var(--gold); font-weight:600;
+  }
+
+
+  /* pulled student reflections */
+  .quote{
+    font-family:var(--display); font-size:calc(var(--u)*2.9); line-height:1.3;
+    background:#fff; border-left:calc(var(--u)*0.55) solid var(--gold);
+    padding:calc(var(--u)*1.6) calc(var(--u)*2.2); margin:calc(var(--u)*1.2) 0;
+  }
+  .quote .attrib{
+    font-family:var(--sans); font-size:calc(var(--u)*1.5); color:var(--slate);
+    margin-top:calc(var(--u)*1); letter-spacing:.04em;
+  }
+  .redact{
+    display:inline-block; width:calc(var(--u)*9);
+    border-bottom:calc(var(--u)*0.35) solid var(--crimson);
+    vertical-align:baseline;
+  }
+  .slide.hold .quote{background:#332e2a; border-left-color:var(--gold); color:var(--cream)}
+
+  .todo-fill{background:#fdf2c8; border-bottom:calc(var(--u)*0.25) dotted var(--gold); padding:0 calc(var(--u)*0.4)}
+
+  /* ---------- special slides ---------- */
+  .slide.section{background:var(--crimson); padding-left:calc(var(--u)*9)}
+  .slide.section h1{color:var(--cream); font-size:calc(var(--u)*9)}
+  .slide.section .sub{color:#f3d9d5; max-width:70%}
+  .slide.section .held{background:var(--cream)}
+
+  .slide.hold{background:#26221f; align-items:flex-start}
+  .slide.hold .stmt{color:var(--cream)}
+  .slide.hold .kicker{color:#8c8378}
+  .slide.hold .held{background:var(--gold)}
+
+  .slide.poll .kicker{color:var(--gold)}
+  .poll-q{font-family:var(--display); font-size:calc(var(--u)*3.6); line-height:1.2; margin:calc(var(--u)*1.6) 0 calc(var(--u)*2)}
+  .opts{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:calc(var(--u)*1.2)}
+  .opts li{
+    font-size:calc(var(--u)*2.6); border:1px solid var(--rule); background:#fff;
+    padding:calc(var(--u)*1.2) calc(var(--u)*2); display:flex; gap:calc(var(--u)*1.6); align-items:baseline;
+  }
+  .opts li span{font-weight:700; color:var(--gold); font-family:var(--mono)}
+
+  /* break */
+  .slide.brk{background:var(--teal); align-items:center; justify-content:center; text-align:center}
+  .slide.brk h1{color:var(--cream)}
+  #cd{font-family:var(--mono); font-size:calc(var(--u)*16); color:#fff; line-height:1; margin:calc(var(--u)*2) 0; font-variant-numeric:tabular-nums}
+  #cd.low{color:#FFD9A0} #cd.done{color:#FFE9B0}
+  #cdlabel{font-size:calc(var(--u)*2.4); color:#d6ecee}
+  .cdbtns{display:flex; gap:calc(var(--u)*1.2); margin-top:calc(var(--u)*2.4)}
+  .cdbtns button{
+    font-family:var(--sans); font-size:calc(var(--u)*1.8); font-weight:600;
+    background:rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.5);
+    border-radius:calc(var(--u)*0.4); padding:calc(var(--u)*0.9) calc(var(--u)*2); cursor:pointer;
+  }
+  .cdbtns button:hover{background:rgba(255,255,255,.28)}
+  .cdbtns button:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
+
+  /* title slide */
+  .slide.cover{background:var(--paper)}
+  .slide.cover h1{font-size:calc(var(--u)*9.5)}
+  .slide.cover .by{font-size:calc(var(--u)*2.4); color:var(--slate); margin-top:calc(var(--u)*3)}
+  .slide.cover .rec{position:absolute; left:calc(var(--u)*9); bottom:calc(var(--u)*5); font-size:calc(var(--u)*1.7); color:var(--slate)}
+
+  /* ---------- chrome ---------- */
+  #num{
+    position:absolute; right:calc(var(--u)*2.4); bottom:calc(var(--u)*1.6);
+    font-family:var(--mono); font-size:calc(var(--u)*2.6); font-weight:700;
+    color:#a89c8c; z-index:20; letter-spacing:.04em;
+  }
+  #clock{
+    position:absolute; left:calc(var(--u)*2.6); bottom:calc(var(--u)*1.6);
+    font-family:var(--mono); font-size:calc(var(--u)*2); color:#bdb2a3; z-index:20;
+  }
+  #clock.running{color:var(--teal); font-weight:700}
+  #bar{position:absolute; left:0; bottom:0; height:calc(var(--u)*0.4); background:var(--gold); z-index:20; transition:width .3s}
+
+  #help{
+    position:fixed; inset:auto 0 0 0; background:#1a1613; color:#e8e0d2;
+    font-family:var(--mono); font-size:13px; padding:14px 20px; display:none; z-index:60;
+    line-height:1.9;
+  }
+  body.help-open #help{display:block}
+  #help b{color:var(--gold)}
+
+  /* author mode */
+  #tools{
+    position:fixed; top:0; left:0; right:0; background:#1a1613; color:#e8e0d2;
+    padding:8px 12px; display:none; gap:8px; z-index:60; flex-wrap:wrap; align-items:center;
+    font-size:13px;
+  }
+  body.authoring #tools{display:flex}
+  body.authoring #stage{padding-top:44px}
+  #tools button{
+    font-family:var(--sans); font-size:12px; font-weight:600;
+    background:#3a332c; color:#f0e9dc; border:1px solid #574d43; border-radius:3px;
+    padding:5px 10px; cursor:pointer;
+  }
+  #tools button:hover{background:#4d443b}
+  #tools button.on{background:var(--gold); color:#1a1613; border-color:var(--gold)}
+  #tools .sep{width:1px; height:20px; background:#574d43; margin:0 4px}
+  #tools .hint{color:#9a8f80}
+  body.editing .slide.on [contenteditable]{outline:1px dashed rgba(154,1,0,.45); outline-offset:3px}
+  body.editing .slide.on [contenteditable]:focus{outline:2px solid var(--teal)}
+
+  #srcedit{
+    position:fixed; inset:44px 0 0 0; background:#12100e; z-index:55; display:none;
+    flex-direction:column; padding:12px;
+  }
+  body.srcedit-open #srcedit{display:flex}
+  #srcedit textarea{
+    flex:1; width:100%; font-family:var(--mono); font-size:13px; line-height:1.5;
+    background:#1c1916; color:#e8e0d2; border:1px solid #3a332c; border-radius:4px; padding:12px;
+  }
+  #srcedit .r{display:flex; gap:8px; margin-top:8px}
+
+  @media print{
+    body{background:#fff; display:block; overflow:visible}
+    #stage,#frame{width:auto; height:auto; display:block}
+    #frame::before{display:none}
+    .slide{display:block !important; position:static; page-break-after:always;
+           padding:0 0 24px; border-bottom:1px solid #ccc; margin-bottom:24px; animation:none}
+    .slide.section,.slide.hold,.slide.brk{background:#fff}
+    .slide.section h1,.slide.hold .stmt,.slide.brk h1{color:#000}
+    #num,#clock,#bar,#tools,#help,.cdbtns{display:none}
+    :root{--u:7px}
+  }
+</style>
+</head>
+<body>
+
+<div id="tools">
+  <button id="tEdit">Edit text</button>
+  <button id="tHtml">Edit slide HTML</button>
+  <div class="sep"></div>
+  <button id="tDup">Duplicate</button>
+  <button id="tNewS">New statement</button>
+  <button id="tNewL">New list</button>
+  <button id="tNewH">New holding</button>
+  <button id="tDel">Delete</button>
+  <div class="sep"></div>
+  <button id="tBack">Move ←</button>
+  <button id="tFwd">Move →</button>
+  <div class="sep"></div>
+  <button id="tSave">Save deck to file</button>
+  <span class="hint">A closes author mode · Esc closes editors</span>
+</div>
+
+<div id="srcedit">
+  <textarea id="srcta" spellcheck="false" aria-label="Slide HTML"></textarea>
+  <div class="r"><button id="srcApply">Apply</button><button id="srcCancel">Cancel</button></div>
+</div>
+
+<div id="stage"><div id="frame">
+
+<!-- ============ BLOCK 1 — FRAMING ============ -->
+
+<section class="slide cover">
+  <div class="kicker">Faculty Flex · SAC &amp; SCC</div>
+  <h1>Socratic AI<br>Tutoring</h1>
+  <div class="held"></div>
+  <div class="by">Designing conversations students can't finish without thinking.<br>John Tashima · Santa Ana College School of Continuing Education</div>
+  <div class="rec">Recording. Everything is linked at the end.</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Why you might be here</div>
+  <div class="two">
+    <div class="card"><p>Students can now skip the thinking you're trying to teach.</p></div>
+    <div class="card" style="border-left-color:var(--teal)"><p>You can't clone yourself. A conversation is what your students need most and get least of.</p></div>
+  </div>
+  <p class="sub">Same design solves both. An AI that asks instead of answers is either a check on offloading or a patient partner who won't do the work for them — depending on which problem you walked in with.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Three ways to be here</div>
+  <div class="rows">
+    <div class="row"><div class="rl">Watch</div><div class="rt">Camera off. Take it in. Try it later.</div></div>
+    <div class="row"><div class="rl">Follow</div><div class="rt">Get partway. One thing works.</div></div>
+    <div class="row"><div class="rl">Build</div><div class="rt">Draft something today.</div></div>
+  </div>
+  <p class="sub">All three are the right way to do this. There's one point where I'll ask you to open a chatbot and play — and watching somebody else do that is a complete version of it.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Housekeeping</div>
+  <ul class="lines">
+    <li>Big questions about AI go in the <em class="hl">parking lot</em> — last ten minutes.</li>
+    <li>Feel free to put questions in the chat.&nbsp; I will get to them as soon as I can 😁</li>
+    <li>One thing will be asked of you today. It takes ninety seconds.</li>
+  </ul>
+</section>
+
+<section class="slide poll">
+  <div class="kicker">Poll</div>
+  <div class="poll-q">Have you ever built — or seriously tried to build — an AI prompt for a class?</div>
+  <ul class="opts">
+    <li><span>1</span>Never</li>
+    <li><span>2</span>Played with it</li>
+    <li><span>3</span>Built something real</li>
+  </ul>
+</section>
+
+<!-- ============ BLOCK 2 — WHAT SOCRATIC QUESTIONING IS ============ -->
+
+<section class="slide section">
+  <h1>What this actually is</h1>
+  <div class="held"></div>
+  <div class="sub">And why it has never worked at scale.</div>
+</section>
+
+<section class="slide">
+  <h2>Most of you already do this.</h2>
+  <div class="held"></div>
+  <ul class="lines tight">
+    <li>Office hours. One student, one question at a time.</li>
+    <li>A lab teacher working beside someone until they see it.</li>
+    <li>An ESL instructor drawing a sentence out instead of supplying it.</li>
+    <li>A trainer asking what would happen if you did it the other way.</li>
+  </ul>
+  <p class="sub">You just might not have called it that.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Unmic — anyone</div>
+  <p class="stmt">What's one thing your students consistently get right but can't explain?</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">A student says</div>
+  <p class="stmt sm">"I think the second one is better."</p>
+  <div class="held"></div>
+  <div class="ex">
+    <div class="turn coach"><div class="who">One kind of response</div><p>Right — the second one is stronger because the writer was actually there, so they had firsthand access.</p></div>
+    <div class="turn coach"><div class="who">The other kind</div><p>What is it about that one that makes it better to you?</p></div>
+  </div>
+  <p class="verdict">The first one is finished, and the student didn't do any of it.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">The definition</div>
+  <p class="stmt">Socratic questioning isn't asking a lot of questions.</p>
+  <div class="held"></div>
+  <p class="stmt">It's asking questions whose answers <em class="hl">you don't supply</em>.</p>
+  <p class="sub">Restraint, not interrogation. In a good seminar, the person leading it is working hard to <em>not</em> say the thing.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">What the pause is worth</div>
+  <div class="quote">The most surprising thing I learned was that reflecting on my mistakes actually made me more confident. Now I believe that progress is more important than perfection.<div class="attrib">— HSENG065 student reflection</div></div>
+  <div class="quote">It made me have to think the reason I do my homework is because I have to stay on top of my homework when I get into the <span class="redact"></span> Program.<div class="attrib">— HSENG065 student reflection</div></div>
+  <p class="tiny">Shared with permission. The blank is mine — in a program our size, naming the field somebody's going into is close to naming them.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">The problem, honestly</div>
+  <p class="stmt sm">We stopped building mental maps the moment something else would hold the map for us.</p>
+  <div class="held"></div>
+  <p class="sub">This isn't students misbehaving. It's people doing what people do.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">And the answer has never scaled</div>
+  <p class="stmt">One instructor.<br>Thirty students, all needing different things.<br>And <em class="hl">no record</em> of any of it.</p>
+</section>
+
+<!-- ============ BLOCK 3 — THE GLASS BOX ============ -->
+
+<section class="slide section">
+  <h1>The Glass Box</h1>
+  <div class="held"></div>
+  <div class="sub">Grade the conversation, not just the essay.</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">What the conversation shows you</div>
+  <div class="rows">
+    <div class="row c"><div class="rl">Their reasoning</div><div class="rt">Not just whether the answer was right — how they got there, and where they were stuck.</div></div>
+    <div class="row"><div class="rl">Their practice</div><div class="rt">Thirty students got fifteen minutes of talking or writing this week. You can see all of it.</div></div>
+  </div>
+  <p class="sub">Two different reasons to want the same thing. Which one matters depends on what you teach.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">A real conversation · HSENG065</div>
+  <p class="sub" style="margin:0 0 calc(var(--u)*1.6)">An excerpt from an actual conversation between a student and a coach.</p>
+  <div class="ex">
+    <div class="turn"><div class="who">Student</div><p>I felt frustrated because I really wanted to make progress…</p></div>
+    <div class="turn coach"><div class="who">Coach</div><p>…what was the story you told yourself about the experience?</p></div>
+    <div class="turn"><div class="who">Student</div><p>…the story I told myself was basically that I just wasn't good at focusing… it made me feel like something was wrong with me…</p></div>
+  </div>
+  <p class="tiny">HSENG065 · shared with permission</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Getting hold of it</div>
+  <div class="rows">
+    <div class="row c"><div class="rl">In an LMS</div><div class="rt">Student saves the conversation as a PDF and uploads it. This is what I do.</div></div>
+    <div class="row"><div class="rl">No LMS</div><div class="rt">The bot ends by producing a short summary they can paste into an email or a text.</div></div>
+    <div class="row g"><div class="rl">In the room</div><div class="rt">One device, projected. You watch it happen and nothing gets collected.</div></div>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="stmt sm">For some of you there's nothing to assess here at all.</p>
+  <div class="held"></div>
+  <p class="stmt sm">The conversation is the whole value.</p>
+</section>
+
+<!-- ============ BLOCK 4 — KINDLING ============ -->
+
+<section class="slide section">
+  <h1>What conversation<br>would be useful<br>in your class?</h1>
+  <div class="held"></div>
+  <div class="sub">The technique is the easy part. Deciding what's worth a conversation is the work.</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Four kinds</div>
+  <div class="rows">
+    <div class="row c"><div class="rl">Explain it to someone who missed class</div><div class="rt">They got it right. Can they say it?</div></div>
+    <div class="row"><div class="rl">Defend the choice you made</div><div class="rt">Why that one — and "because it's better" doesn't count.</div></div>
+    <div class="row g"><div class="rl">Predict, then check</div><div class="rt">What will happen, and why? Then run it.</div></div>
+    <div class="row c"><div class="rl">Talk me through the order</div><div class="rt">Why this step first? What breaks if you flip them?</div></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="kicker">A student on that last one</div>
+  <div class="quote">The main piece of advice my AI coach gave me was to clearly connect each action in my system to my main goal of becoming a <span class="redact"></span>. At first, my paragraph was listed what I was doing, but it didn't explain why those steps mattered.<div class="attrib">— HSENG065 student reflection</div></div>
+  <p class="sub">Nobody marked that in red. The conversation surfaced it.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">And one I nearly left off</div>
+  <h2>Rehearse a real conversation.</h2>
+  <div class="held"></div>
+  <ul class="lines tight">
+    <li>A job interview</li>
+    <li>A call to a landlord</li>
+    <li>Describing a symptom to a doctor</li>
+    <li>A difficult customer</li>
+    <li>A parent–teacher meeting</li>
+  </ul>
+  <p class="sub">A partner who never gets impatient, never sighs, and will run it thirty times.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Three more</div>
+  <div class="rows">
+    <div class="row"><div class="rl">Which one would you trust?</div><div class="rt">Two sources, two ads, two news stories. What tipped it?</div></div>
+    <div class="row g"><div class="rl">What would change your mind?</div><div class="rt">If nothing would, it isn't a position yet.</div></div>
+    <div class="row c"><div class="rl">Tell me what you already know</div><div class="rt">Before the unit starts. Adults arrive with twenty years of material.</div></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="kicker">And three more</div>
+  <div class="rows">
+    <div class="row c"><div class="rl">Find your own example</div><div class="rt">Locate the concept in your own life or work.</div></div>
+    <div class="row"><div class="rl">Debrief what you just did</div><div class="rt">After the performance, the shift, the presentation.</div></div>
+    <div class="row g"><div class="rl">Ask me questions until you understand it</div><div class="rt">They generate the questions. Shows you what they don't know they don't know.</div></div>
+  </div>
+</section>
+
+<section class="slide poll">
+  <div class="kicker">Poll</div>
+  <div class="poll-q">Which of these is closest to something you'd actually use?</div>
+  <ul class="opts">
+    <li><span>1</span>Explain it / defend it</li>
+    <li><span>2</span>Rehearse a real conversation</li>
+    <li><span>3</span>Talk me through the order</li>
+    <li><span>4</span>Which would you trust</li>
+    <li><span>5</span>Something else</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">Unmic</div>
+  <p class="stmt">What would you want a conversation like this to do in your class?</p>
+</section>
+
+<!-- ============ BLOCK 5 — PLAY ============ -->
+
+<section class="slide section">
+  <h1>Your turn.<br>Be the student.</h1>
+  <div class="held"></div>
+  <div class="sub">Sixteen minutes inside one.</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Getting in — no account needed</div>
+  <ul class="lines">
+    <li>Open <em class="hl">chatgpt.com</em> or <em class="hl">gemini.google.com</em></li>
+    <li>Paste the prompt from chat</li>
+    <li>Answer like a student would</li>
+  </ul>
+  <p class="sub">Nothing you type here is student information, so there's nothing to worry about on that front.</p>
+</section>
+
+<section class="slide hold">
+  <div class="kicker">Twelve minutes — go</div>
+  <ul class="lines tight" style="color:var(--cream)">
+    <li>Answer it well. See what happens.</li>
+    <li>Answer it badly. See what happens.</li>
+    <li>Try to get it to just tell you.</li>
+    <li><em style="color:#F0C271;font-style:normal">Watch what it does when you give it a good answer.</em></li>
+  </ul>
+  <div class="held"></div>
+  <p class="tiny" style="color:#a89c8c">Type in chat if something breaks — I can't see you.</p>
+</section>
+
+<section class="slide hold">
+  <div class="kicker">If you finish early</div>
+  <p class="stmt">Change one line in the prompt and run it again.</p>
+  <div class="held"></div>
+  <p class="tiny" style="color:#a89c8c">Try deleting a rule and see what breaks.</p>
+</section>
+
+<!-- ============ BLOCK 6 — WHAT YOU NOTICED ============ -->
+
+<section class="slide section">
+  <h1>What did you notice?</h1>
+  <div class="held"></div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Unmic</div>
+  <p class="stmt">What surprised you?</p>
+</section>
+
+<section class="slide">
+  <p class="stmt">Three things made that work.</p>
+  <div class="held"></div>
+  <p class="stmt sm">That's the whole list.</p>
+  <p class="sub">I've been at this a year and found a lot more than three. These are the three that matter on day one. The rest is on the handout.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">One</div>
+  <h2>Say what the conversation should produce.</h2>
+  <div class="held"></div>
+  <div class="quote">My AI coach requested me to write down my goal and my system in one paragraph. My writing was a little messy before because I wrote everything down separately. My paragraph looked better and made more sense when I changed it.<div class="attrib">— HSENG065 student reflection</div></div>
+  <p class="sub">It ends when a thing exists — not when the student is tired.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Two</div>
+  <h2>Tell it what to do with each kind of answer.</h2>
+  <div class="held"></div>
+  <div class="rows">
+    <div class="row"><div class="rl">Answer like this →</div><div class="rt">ask this</div></div>
+    <div class="row g"><div class="rl">Answer like that →</div><div class="rt">ask something different</div></div>
+    <div class="row c"><div class="rl">Answer like the third →</div><div class="rt">ask a third thing</div></div>
+  </div>
+  <p class="sub">A prompt that reacts is a chatbot. A prompt that sorts is a teacher. This is what you'll build after the break.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Three</div>
+  <h2>Take a good answer when you get one.</h2>
+  <div class="held"></div>
+  <div class="quote">I did realize though that the only sentence that needed to be revised was that one, which made me feel incredible, I honestly thought that I would need help in various areas of my paragraph.<div class="attrib">— HSENG065 student reflection</div></div>
+  <div class="quote">The AI didn't overwhelm me it focused on one main thing at a time, which made the revision feel easier and less stressful.<div class="attrib">— HSENG065 student reflection</div></div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Why that third one matters most</div>
+  <p class="stmt sm">A coach built to hold back does something no worksheet can.</p>
+  <div class="held"></div>
+  <p class="stmt sm">The students furthest from academic English <em class="hl">get to keep their own words</em>.</p>
+  <p class="sub">I looked at who my coach was rewriting. It was rewriting the students whose English was least standard, and leaving the polished ones alone. It wasn't judging ideas — it was judging how the sentence sounded.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">And the honest one</div>
+  <div class="quote">Sometimes it asks a lot of questions and I think I'm done and then it wants more information.<div class="attrib">— HSENG065 student reflection</div></div>
+  <p class="sub">That's a real limitation, and a student found it before I did. When these go wrong, this is usually how — not by being too easy. By being too relentless.</p>
+</section>
+
+<!-- ============ BLOCK 7 — WHAT YOU CAN USE ============ -->
+
+<section class="slide">
+  <div class="kicker">Where to do this for real</div>
+  <h2>Nectir</h2>
+  <div class="held"></div>
+  <ul class="lines tight">
+    <li>Free</li>
+    <li>Approved for student work</li>
+    <li>You write the prompt on the instructor side</li>
+    <li>No LMS required</li>
+  </ul>
+  <p class="sub">What you just played with is fine for trying things out. Real student writing goes through the approved tool.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">The one thing I wish someone had told me</div>
+  <p class="stmt sm">Eventually a student will tell it something serious.</p>
+  <div class="held gold"></div>
+  <ul class="lines tight">
+    <li>If the hard thing is the <em>subject</em> of the work — one warm sentence, then keep going.</li>
+    <li>If it's about right now — stop coaching. Stay warm, don't probe, name a person.</li>
+    <li>Put the real offices and numbers <em>in the prompt</em>. Left to improvise, it invents plausible wrong ones.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">One rule about student writing</div>
+  <div class="rows">
+    <div class="row c"><div class="rl">Real student work goes only through the approved tool.</div></div>
+    <div class="row"><div class="rl">When you're testing your own prompt, make up the answers yourself.</div></div>
+  </div>
+  <p class="sub">You saw me blank out a word earlier. Same reason. A paragraph about someone's family, or the field they're going into, identifies them without a name.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">The only thing I'm asking you to do today</div>
+  <p class="stmt" style="text-align:center;padding:calc(var(--u)*3) 0;color:var(--crimson)">Nectir AI Interest Form</p>
+  <p class="sub">Ninety seconds. The account takes a few days, so do it now rather than when you need it.</p>
+</section>
+
+<section class="slide brk">
+  <h1>Break</h1>
+  <div id="cd">7:00</div>
+  <div id="cdlabel">Back at the top of the hour</div>
+  <div class="cdbtns">
+    <button data-cd="start">Start</button>
+    <button data-cd="pause">Pause</button>
+    <button data-cd="plus">+1 min</button>
+    <button data-cd="reset">Reset</button>
+  </div>
+  <p class="tiny" style="color:#d6ecee">Fill out the form while you're up.</p>
+</section>
+
+<!-- ============ BLOCK 8 — COLLECTIVE BUILD ============ -->
+
+<section class="slide section">
+  <h1>Let's build one together</h1>
+  <div class="held"></div>
+  <div class="sub">Then you'll do your own.</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">The moment we'll use — the first kind on the list</div>
+  <p class="stmt sm">A student gives you the right answer, and you can't tell if they understand it.</p>
+  <div class="held"></div>
+  <p class="stmt sm">So you ask them to explain it in their own words — like they're telling a friend who missed class.</p>
+</section>
+
+<section class="slide hold">
+  <div class="kicker">Screen share — the worksheet</div>
+  <p class="stmt">Q3. What answers do you <em style="color:#F0C271;font-style:normal">actually</em> get?</p>
+  <div class="held"></div>
+  <p class="tiny" style="color:#a89c8c">Chat, please. Not the worst one — the usual one. I'm going to stop talking for a minute.</p>
+</section>
+
+<!-- ============ BLOCK 9 — PRIVATE ============ -->
+
+<section class="slide">
+  <div class="kicker">Your turn · fifteen minutes</div>
+  <ul class="lines tight">
+    <li><em class="hl">Part one</em> — four questions, five minutes, and it runs.</li>
+    <li><em class="hl">Part two</em> — the branch. Only if you want it.</li>
+    <li>Cameras off. Nothing gets collected.</li>
+    <li>Six filled-in examples are at the bottom of the sheet.</li>
+  </ul>
+  <p class="sub">Stopping after part one is a real outcome. I'll check in once in the middle and once near the end.</p>
+</section>
+
+<!-- ============ BLOCK 10 — TWO DOORS ============ -->
+
+<section class="slide">
+  <div class="kicker">Two doors — both fine</div>
+  <div class="rows">
+    <div class="row"><div class="rl">Join a room</div><div class="rt">Find a partner, trade sheets, one question each.</div></div>
+    <div class="row c"><div class="rl">Stay here</div><div class="rt">I'll work through a couple on screen.</div></div>
+  </div>
+  <p class="sub">Staying here and thinking about your own course is a complete version of this. A room is a different version, not a better one.</p>
+</section>
+
+<!-- ============ BLOCK 11 — CLOSE ============ -->
+
+<section class="slide">
+  <div class="kicker">What you have now</div>
+  <ul class="lines">
+    <li>A kind of conversation worth having</li>
+    <li>A moment in your course</li>
+    <li>Three answers you already knew</li>
+    <li>A prompt fragment that runs</li>
+  </ul>
+  <p class="sub">There's no next level you have to reach. If all you ever do is ask those three questions yourself in class, you've got the whole idea.</p>
+</section>
+
+<section class="slide section">
+  <h1>The clinic</h1>
+  <div class="held"></div>
+  <div class="sub"><b style="font-size:calc(var(--u)*3.2);display:block;margin-bottom:calc(var(--u)*1.6)">Friday, August 28 · 2–4 p.m.</b>Bring the sheet and whatever happened when you tried it. Small group, real drafts, nothing to prepare.<br><br>If your account isn't live yet, come anyway.</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Parking lot</div>
+  <p class="sub" style="max-width:90%">The questions we held. Type them in during the session — this slide is editable in author mode (press A, then E).</p>
+  <ul class="lines tight"><li>—</li><li>—</li><li>—</li></ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">Where everything lives</div>
+  <p class="stmt sm" style="color:var(--crimson);word-break:break-word"><span class="todo-fill">[hub page address]</span></p>
+  <div class="held"></div>
+  <p class="sub">Send me what you have and what it's doing.<br><span class="todo-fill">[your email]</span></p>
+</section>
+
+<section class="slide">
+  <div class="quote" style="font-size:calc(var(--u)*4.2)">Now I believe that progress is more important than perfection.<div class="attrib">— HSENG065 student reflection</div></div>
+</section>
+
+<div id="num">1</div>
+<div id="clock">0:00</div>
+<div id="bar"></div>
+
+</div></div>
+
+<div id="help">
+  <b>→ space PgDn</b> next &nbsp;·&nbsp; <b>← PgUp</b> back &nbsp;·&nbsp; <b>Home/End</b> first/last &nbsp;·&nbsp; <b>G</b> go to slide<br>
+  <b>A</b> author mode &nbsp;·&nbsp; <b>E</b> edit text &nbsp;·&nbsp; <b>T</b> start/stop session timer &nbsp;·&nbsp; <b>R</b> reset timer &nbsp;·&nbsp; <b>F</b> fullscreen &nbsp;·&nbsp; <b>P</b> print handout &nbsp;·&nbsp; <b>?</b> this help<br>
+  Clicking the slide never advances it — that's on purpose, so giving the window focus is safe.
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var frame = document.getElementById('frame');
+  var slides = Array.prototype.slice.call(frame.querySelectorAll('.slide'));
+  var num = document.getElementById('num'), bar = document.getElementById('bar'),
+      clock = document.getElementById('clock');
+  var i = 0;
+
+  function sizeUnit(){
+    document.documentElement.style.setProperty('--u', (frame.clientWidth/100) + 'px');
+  }
+  window.addEventListener('resize', sizeUnit);
+
+  function show(n){
+    if(n < 0) n = 0;
+    if(n > slides.length-1) n = slides.length-1;
+    slides[i].classList.remove('on');
+    i = n;
+    slides[i].classList.add('on');
+    num.textContent = (i+1);
+    bar.style.width = ((i+1)/slides.length*100) + '%';
+    try{ location.hash = i+1; }catch(e){}
+  }
+
+  /* ---------- session timer ---------- */
+  var t0 = null, running = false, tick = null;
+  function paintClock(){
+    if(!t0){ clock.textContent = '0:00'; return; }
+    var s = Math.floor((Date.now()-t0)/1000);
+    clock.textContent = Math.floor(s/60) + ':' + (s%60<10?'0':'') + (s%60);
+  }
+
+  /* ---------- author mode ---------- */
+  var EDITABLE = 'h1,h2,p,li,.rl,.rt,.kicker,.by,.rec,.poll-q,.ph,.paste,.shot,.sub,.tiny,.verdict,.who';
+  function setEditing(on){
+    document.body.classList.toggle('editing', on);
+    document.getElementById('tEdit').classList.toggle('on', on);
+    slides.forEach(function(s){
+      s.querySelectorAll(EDITABLE).forEach(function(el){
+        if(on) el.setAttribute('contenteditable','true');
+        else el.removeAttribute('contenteditable');
+      });
+    });
+  }
+  function setAuthoring(on){
+    document.body.classList.toggle('authoring', on);
+    if(!on){ setEditing(false); document.body.classList.remove('srcedit-open'); }
+    sizeUnit();
+  }
+
+  function reindex(){
+    slides = Array.prototype.slice.call(frame.querySelectorAll('.slide'));
+    if(i > slides.length-1) i = slides.length-1;
+    slides.forEach(function(s,n){ s.classList.toggle('on', n===i); });
+    num.textContent = (i+1);
+    bar.style.width = ((i+1)/slides.length*100) + '%';
+  }
+
+  function mk(html){
+    var d = document.createElement('section');
+    d.className = 'slide';
+    d.innerHTML = html;
+    return d;
+  }
+  function insertAfterCurrent(el){
+    slides[i].parentNode.insertBefore(el, slides[i].nextSibling);
+    reindex(); show(i+1);
+    if(document.body.classList.contains('editing')) setEditing(true);
+  }
+
+  document.getElementById('tEdit').addEventListener('click', function(){
+    setEditing(!document.body.classList.contains('editing'));
+  });
+  document.getElementById('tDup').addEventListener('click', function(){
+    var c = slides[i].cloneNode(true);
+    c.classList.remove('on');
+    c.querySelectorAll('[contenteditable]').forEach(function(e){ e.removeAttribute('contenteditable'); });
+    insertAfterCurrent(c);
+  });
+  document.getElementById('tNewS').addEventListener('click', function(){
+    insertAfterCurrent(mk('<div class="kicker">Kicker</div><p class="stmt">New statement.</p><div class="held"></div><p class="sub">Supporting line.</p>'));
+  });
+  document.getElementById('tNewL').addEventListener('click', function(){
+    insertAfterCurrent(mk('<div class="kicker">Kicker</div><h2>Heading</h2><div class="held"></div><ul class="lines tight"><li>One</li><li>Two</li><li>Three</li></ul>'));
+  });
+  document.getElementById('tNewH').addEventListener('click', function(){
+    var s = mk('<div class="kicker">Screen share</div><p class="stmt">Holding slide.</p><div class="held"></div>');
+    s.classList.add('hold');
+    insertAfterCurrent(s);
+  });
+  document.getElementById('tDel').addEventListener('click', function(){
+    if(slides.length < 2) return;
+    if(!confirm('Delete slide ' + (i+1) + '?')) return;
+    var n = i;
+    slides[i].parentNode.removeChild(slides[i]);
+    i = Math.max(0, n-1);
+    reindex(); show(i);
+  });
+  document.getElementById('tBack').addEventListener('click', function(){
+    if(i === 0) return;
+    var cur = slides[i], prev = slides[i-1];
+    cur.parentNode.insertBefore(cur, prev);
+    i = i-1; reindex(); show(i);
+  });
+  document.getElementById('tFwd').addEventListener('click', function(){
+    if(i === slides.length-1) return;
+    var cur = slides[i], next = slides[i+1];
+    cur.parentNode.insertBefore(next, cur);
+    i = i+1; reindex(); show(i);
+  });
+
+  var srcta = document.getElementById('srcta');
+  document.getElementById('tHtml').addEventListener('click', function(){
+    srcta.value = slides[i].innerHTML.trim();
+    document.body.classList.add('srcedit-open');
+    srcta.focus();
+  });
+  document.getElementById('srcApply').addEventListener('click', function(){
+    slides[i].innerHTML = srcta.value;
+    document.body.classList.remove('srcedit-open');
+    if(document.body.classList.contains('editing')) setEditing(true);
+  });
+  document.getElementById('srcCancel').addEventListener('click', function(){
+    document.body.classList.remove('srcedit-open');
+  });
+
+  document.getElementById('tSave').addEventListener('click', function(){
+    var wasEditing = document.body.classList.contains('editing');
+    setEditing(false);
+    var wasAuthoring = document.body.classList.contains('authoring');
+    document.body.classList.remove('authoring','help-open','srcedit-open');
+    var doc = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    var blob = new Blob([doc], {type:'text/html'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'socratic-workshop-deck.html';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+    if(wasAuthoring) setAuthoring(true);
+    if(wasEditing) setEditing(true);
+  });
+
+  /* ---------- keys ---------- */
+  function typing(el){
+    return el && (el.isContentEditable || el.tagName === 'TEXTAREA' || el.tagName === 'INPUT');
+  }
+  document.addEventListener('keydown', function(e){
+    var k = e.key;
+    if(k === 'Escape'){
+      document.body.classList.remove('help-open','srcedit-open');
+      if(document.body.classList.contains('editing')) setEditing(false);
+      return;
+    }
+    if(typing(e.target)) return;
+    if(document.body.classList.contains('srcedit-open')) return;
+
+    if(k==='ArrowRight' || k===' ' || k==='PageDown'){ e.preventDefault(); show(i+1); }
+    else if(k==='ArrowLeft' || k==='PageUp'){ e.preventDefault(); show(i-1); }
+    else if(k==='Home'){ show(0); }
+    else if(k==='End'){ show(slides.length-1); }
+    else if(k==='g' || k==='G'){
+      var n = prompt('Go to slide (1–' + slides.length + ')');
+      if(n) show(parseInt(n,10)-1);
+    }
+    else if(k==='e' || k==='E'){ setEditing(!document.body.classList.contains('editing')); }
+    else if(k==='a' || k==='A'){ setAuthoring(!document.body.classList.contains('authoring')); }
+    else if(k==='t' || k==='T'){
+      if(running){ running=false; clearInterval(tick); }
+      else { running=true; if(!t0) t0=Date.now(); tick=setInterval(paintClock,1000); }
+      clock.classList.toggle('running', running); paintClock();
+    }
+    else if(k==='r' || k==='R'){ running=false; t0=null; clearInterval(tick); clock.classList.remove('running'); paintClock(); }
+    else if(k==='f' || k==='F'){
+      if(document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen();
+    }
+    else if(k==='p' || k==='P'){ window.print(); }
+    else if(k==='?' || k==='/'){ document.body.classList.toggle('help-open'); }
+  });
+
+  /* Clicking the stage does NOT change slides — it only gives the window focus,
+     which is exactly what you want when switching between shared screens. */
+
+  /* ---------- break countdown ---------- */
+  var cdEl = document.getElementById('cd'), cdLabel = document.getElementById('cdlabel');
+  var cdLeft = 420, cdRun = false, cdIv = null, cdStarted = false;
+  function cdPaint(){
+    var m = Math.floor(Math.max(cdLeft,0)/60), s = Math.max(cdLeft,0)%60;
+    cdEl.textContent = m + ':' + (s<10?'0':'') + s;
+    cdEl.classList.toggle('low', cdLeft <= 60 && cdLeft > 0);
+    cdEl.classList.toggle('done', cdLeft <= 0);
+    if(cdLeft <= 0) cdLabel.textContent = 'Time — welcome back';
+  }
+  function cdStop(){ cdRun = false; clearInterval(cdIv); }
+  function cdStart(){
+    if(cdRun || cdLeft <= 0) return;
+    cdRun = true;
+    cdIv = setInterval(function(){ cdLeft--; cdPaint(); if(cdLeft<=0) cdStop(); }, 1000);
+  }
+  document.querySelectorAll('.cdbtns button').forEach(function(b){
+    b.addEventListener('click', function(){
+      var a = b.getAttribute('data-cd');
+      if(a==='start') cdStart();
+      else if(a==='pause') cdStop();
+      else if(a==='plus'){ cdLeft += 60; cdPaint(); }
+      else if(a==='reset'){ cdStop(); cdLeft = 420; cdLabel.textContent='Back at the top of the hour'; cdPaint(); }
+    });
+  });
+  cdPaint();
+
+  /* auto-start the countdown the first time the break slide is reached */
+  var breakSlide = frame.querySelector('.slide.brk');
+  var _show = show;
+  show = function(n){
+    _show(n);
+    if(slides[i] === breakSlide && !cdStarted){ cdStarted = true; cdStart(); }
+  };
+
+  /* ---------- boot ---------- */
+  sizeUnit();
+  var start = parseInt((location.hash||'').replace('#',''), 10);
+  slides[0].classList.add('on');
+  if(start && start >= 1 && start <= slides.length) show(start-1);
+  else show(0);
+  paintClock();
+})();
+</script>
+
+</body></html>

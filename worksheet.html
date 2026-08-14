@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build one — a worksheet for your first Socratic AI conversation</title>
+<style>
+  :root{
+    --ink:#1a1613;
+    --crimson:#9A0100;
+    --cream:#FFF8E1;
+    --teal:#0F6E7E;
+    --gold:#956C09;
+    --slate:#4A6B7C;
+    --paper:#FDFBF5;
+    --rule:#e3ddcd;
+    --display:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:#efe9dc; color:var(--ink);
+       font-family:var(--sans); font-size:17px; line-height:1.55}
+  .sheet{max-width:50rem; margin:0 auto; background:var(--paper);
+         padding:2.5rem 2rem 4rem; min-height:100vh; box-shadow:0 0 2.5rem rgba(0,0,0,.10)}
+
+  h1{font-family:var(--display); font-weight:400; font-size:2.5rem; line-height:1.1;
+     margin:0 0 .4rem; color:var(--crimson)}
+  h2{font-family:var(--display); font-weight:400; font-size:1.7rem; line-height:1.15;
+     margin:2.6rem 0 .6rem}
+  p{margin:0 0 1rem}
+  .lede{font-size:1.12rem; color:var(--slate); margin-bottom:1.6rem}
+  .marker{font-size:1.6rem; vertical-align:-.1em}
+
+  hr{border:0; height:3px; margin:2.4rem 0;
+     background:linear-gradient(to right,var(--crimson),var(--gold),transparent)}
+
+  .hero{background:var(--cream); border-left:6px solid var(--crimson);
+        padding:1.3rem 1.4rem; margin:0 0 1.8rem}
+  .hero p:last-child{margin-bottom:0}
+
+  .note{background:#fff; border:1px solid var(--rule); border-left:4px solid var(--teal);
+        padding:.9rem 1.1rem; margin:1.2rem 0}
+  .note p:last-child{margin-bottom:0}
+  .note .lbl{display:block; font-size:.78rem; font-weight:700; letter-spacing:.1em;
+             text-transform:uppercase; color:var(--teal); margin-bottom:.35rem}
+  .note.warn{border-left-color:var(--gold)} .note.warn .lbl{color:var(--gold)}
+
+  /* part banners */
+  .part{background:var(--crimson); color:var(--cream); padding:1.1rem 1.3rem; margin:2.6rem 0 1.4rem}
+  .part .pn{font-size:.78rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:#f3d9d5}
+  .part h2{color:var(--cream); margin:.2rem 0 .3rem; font-size:1.9rem}
+  .part p{margin:0; color:#f7e6e3; font-size:.98rem}
+  .part.two{background:var(--teal)} .part.two .pn{color:#cfe6e9} .part.two p{color:#e2f1f2}
+
+  .stopline{border:2px solid var(--gold); background:#fdf6df; padding:1.1rem 1.3rem; margin:1.6rem 0}
+  .stopline b{color:var(--gold)}
+  .stopline p:last-child{margin-bottom:0}
+
+  .q{margin:1.8rem 0}
+  .qnum{display:inline-block; background:var(--crimson); color:#fff; font-weight:700;
+        font-size:.8rem; letter-spacing:.1em; padding:.22rem .6rem; border-radius:3px; margin-bottom:.6rem}
+  .qnum.t{background:var(--teal)}
+  .qtext{font-family:var(--display); font-size:1.45rem; line-height:1.25; margin:0 0 .35rem}
+  .qhelp{color:var(--slate); font-size:.95rem; margin:0 0 .7rem}
+
+  label{display:block; font-weight:600; font-size:.92rem; margin:.9rem 0 .25rem}
+  textarea, input[type=text]{width:100%; font-family:var(--sans); font-size:1rem; line-height:1.5;
+    color:var(--ink); background:#fff; border:1px solid #b9b0a0; border-radius:4px;
+    padding:.6rem .7rem; resize:vertical}
+  textarea:focus, input[type=text]:focus{outline:3px solid var(--teal); outline-offset:1px; border-color:var(--teal)}
+  .pair{border:1px solid var(--rule); border-radius:5px; padding:.9rem 1rem;
+        margin:0 0 1rem; background:#fffdf7}
+  .pair .cap{font-size:.78rem; font-weight:700; letter-spacing:.1em;
+             text-transform:uppercase; color:var(--slate)}
+
+  button{font-family:var(--sans); font-size:.95rem; font-weight:600;
+         background:var(--teal); color:#fff; border:1px solid var(--teal);
+         border-radius:4px; padding:.55rem 1rem; cursor:pointer}
+  button:hover{filter:brightness(1.1)}
+  button:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
+  button.ghost{background:#fff; color:var(--teal)}
+  button.plain{background:#fff; color:var(--ink); border-color:#b9b0a0; font-weight:500}
+  .row{display:flex; flex-wrap:wrap; gap:.5rem; margin:1rem 0}
+
+  #out{font-family:var(--mono); font-size:.9rem; line-height:1.5; white-space:pre-wrap;
+       background:#26221f; color:#f4efe4; padding:1.1rem 1.2rem; border-radius:5px; margin:1rem 0}
+  #out:empty{display:none}
+  #status{font-size:.9rem; color:var(--teal); font-weight:600; min-height:1.4em}
+
+  details{border:1px solid var(--rule); border-radius:5px; padding:.7rem .9rem;
+          margin:0 0 .6rem; background:#fff}
+  summary{cursor:pointer; font-weight:600}
+  summary:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
+  details[open] summary{margin-bottom:.7rem; color:var(--crimson)}
+  .ex dt{font-weight:700; font-size:.85rem; color:var(--slate); text-transform:uppercase;
+         letter-spacing:.06em; margin-top:.8rem}
+  .ex dd{margin:.15rem 0 0 0}
+  .ex .wrong{border-left:3px solid var(--gold); padding-left:.7rem; margin:.5rem 0}
+  .ex .wrong em{display:block; color:var(--slate); font-style:normal; font-size:.94rem}
+
+  ol.ladder{padding-left:1.3rem; margin:.6rem 0}
+  ol.ladder li{margin-bottom:.5rem}
+
+  ul.check{list-style:none; padding:0; margin:0}
+  ul.check li{border:1px solid var(--rule); border-left:4px solid var(--crimson);
+              background:#fff; padding:.75rem .9rem; margin:0 0 .55rem}
+  ul.check b{display:block; margin-bottom:.15rem}
+  ul.check span{color:var(--slate); font-size:.95rem}
+
+  .todo{background:#fdf2c8; padding:0 .25rem; border-bottom:2px dotted var(--gold)}
+  footer{margin-top:3rem; color:var(--slate); font-size:.9rem}
+
+  @media (max-width:640px){.sheet{padding:1.5rem 1.1rem 3rem} h1{font-size:2rem} .qtext{font-size:1.25rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important}}
+  @media print{
+    body{background:#fff} .sheet{box-shadow:none; max-width:none; padding:0}
+    button, .row, #status{display:none}
+    textarea, input[type=text]{border:1px solid #999; min-height:4.5rem}
+    details{break-inside:avoid}
+    details:not([open]) > *:not(summary){display:none}
+  }
+</style>
+</head>
+<body>
+<main class="sheet">
+
+<p style="font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--slate);font-weight:700;margin:0 0 .5rem">
+  Socratic AI Tutoring · Worksheet</p>
+
+<h1><span class="marker" aria-hidden="true">🔀</span> Build one</h1>
+<p class="lede">Two parts. The first takes five minutes and gives you a working conversation. The second is what makes it teach instead of chat.</p>
+
+<div class="hero">
+  <p><b>This sheet is written for the hardest reader: you, alone, two weeks from now, with nobody to ask.</b> Everything you need is on this page. You don't need to have been in the workshop and you don't need any experience with AI.</p>
+  <p style="margin-bottom:0">Rough is fine. Rough is the point.</p>
+</div>
+
+<h2>What you're making</h2>
+
+<p>A Socratic AI tutor is a chatbot following instructions you wrote. The instructions tell it to ask instead of answer, and to keep going until the student has produced something.</p>
+
+<p>You write those instructions in plain English. There's no code. When you're done here, you press a button and this page assembles your answers into instructions you can paste into a chatbot.</p>
+
+<div class="note">
+  <span class="lbl">Where to try it</span>
+  <p><b>chatgpt.com</b> or <b>gemini.google.com</b> — neither needs an account. Fine for testing and for making up practice conversations.</p>
+  <p style="margin-bottom:0"><b>For real student work, use the tool your district has approved.</b> Anything a student actually writes goes there and nowhere else.</p>
+</div>
+
+<!-- ============ PART ONE ============ -->
+
+<div class="part">
+  <div class="pn">Part one</div>
+  <h2>Your first conversation</h2>
+  <p>Four questions. About five minutes. You'll have something that runs.</p>
+</div>
+
+<div class="q">
+  <span class="qnum">1</span>
+  <p class="qtext">What's this conversation about?</p>
+  <p class="qhelp">One or two sentences. Where in your course it happens, and what the student is being asked to do.</p>
+  <label for="q1">The moment</label>
+  <textarea id="q1" rows="3" placeholder="After they read the two accounts, students decide which one they trust more."></textarea>
+</div>
+
+<div class="q">
+  <span class="qnum">2</span>
+  <p class="qtext">What should the student have by the end?</p>
+  <p class="qhelp">Something you could point at. This is what tells the conversation when to stop — without it, the bot just keeps being pleasant.</p>
+  <label for="q2">By the end, the student has…</label>
+  <textarea id="q2" rows="2" placeholder="A choice, and two reasons for it in their own words."></textarea>
+</div>
+
+<div class="q">
+  <span class="qnum">3</span>
+  <p class="qtext">What should the student work out on their own?</p>
+  <p class="qhelp">Name the part that's theirs. The bot can explain anything you've already taught — but whatever goes here, it asks about and never supplies.</p>
+  <label for="q3">Theirs to figure out</label>
+  <textarea id="q3" rows="2" placeholder="Which account they trust, and what made them decide."></textarea>
+</div>
+
+<div class="q">
+  <span class="qnum">4</span>
+  <p class="qtext">What's the first question it asks?</p>
+  <p class="qhelp">How the conversation opens. Something they can answer from where they're standing.</p>
+  <label for="q4">Opening question</label>
+  <textarea id="q4" rows="2" placeholder="Which of the two accounts did you find more believable?"></textarea>
+</div>
+
+<div class="row">
+  <button id="build" type="button">Assemble it</button>
+  <button id="copy" type="button" class="ghost">Copy it</button>
+  <button id="save" type="button" class="plain">Save my worksheet</button>
+  <button id="print" type="button" class="plain">Print</button>
+</div>
+<p id="status" role="status" aria-live="polite"></p>
+<div id="out"></div>
+
+<div class="stopline">
+  <p><b>You can stop here, and that's a real outcome.</b> Paste that into a chatbot, be a student for five minutes, and you'll have run a Socratic tutor you wrote.</p>
+  <p>Part two is what turns it from a conversation into teaching. It takes longer and it's the part only you can do — but it isn't a requirement, and it will still be here next week.</p>
+</div>
+
+<hr>
+
+<!-- ============ PART TWO ============ -->
+
+<div class="part two">
+  <div class="pn">Part two</div>
+  <h2>The Branch</h2>
+  <p>You already know the wrong answers. That's the branch.</p>
+</div>
+
+<p>Part one gets the bot asking. But it treats every student the same — same follow-up, whoever they are and whatever they said.</p>
+
+<p>Teaching is what happens next: you notice <em>what kind</em> of answer you just got, and you say something different depending on which kind it was. That's the part that looks hard and isn't, because it's built out of something you already carry around.</p>
+
+<p style="font-family:var(--display);font-size:1.4rem;line-height:1.3;color:var(--crimson);margin:1.4rem 0">
+  You can predict the unsatisfying answers. You've been watching them for years.</p>
+
+<div class="q">
+  <span class="qnum t">5</span>
+  <p class="qtext">What answer would you be thrilled to get?</p>
+  <p class="qhelp">Write it the way a real student would write it, not the way you would. Thrilled, not perfect.</p>
+  <label for="q5">The answer you're hoping for</label>
+  <textarea id="q5" rows="3" placeholder="I trust the second one more because the person was actually there, and they name the date and who else was in the room."></textarea>
+</div>
+
+<div class="q">
+  <span class="qnum t">6</span>
+  <p class="qtext">What answers do you actually get?</p>
+  <p class="qhelp">The three most common unsatisfying responses. Not the worst ones — the <em>usual</em> ones. Include the ones that are almost right.</p>
+
+  <div class="pair">
+    <span class="cap">Usual answer 1</span>
+    <label for="w1">What they say</label>
+    <textarea id="w1" rows="2" placeholder="The second one, because it's more reliable."></textarea>
+    <label for="n1">What's missing from it</label>
+    <input type="text" id="n1" placeholder="Names the judgment, no reason behind it.">
+  </div>
+
+  <div class="pair">
+    <span class="cap">Usual answer 2</span>
+    <label for="w2">What they say</label>
+    <textarea id="w2" rows="2" placeholder="Both of them have good points."></textarea>
+    <label for="n2">What's missing from it</label>
+    <input type="text" id="n2" placeholder="Won't commit — no position to defend.">
+  </div>
+
+  <div class="pair">
+    <span class="cap">Usual answer 3</span>
+    <label for="w3">What they say</label>
+    <textarea id="w3" rows="2" placeholder="The second one says the first one got the date wrong."></textarea>
+    <label for="n3">What's missing from it</label>
+    <input type="text" id="n3" placeholder="Repeats the source instead of judging it.">
+  </div>
+</div>
+
+<div class="q">
+  <span class="qnum t">7</span>
+  <p class="qtext">What would you ask next — for each one?</p>
+  <p class="qhelp">One question per answer, and a different one each time. This is the whole exercise. If all three get the same question, you don't have a branch yet.</p>
+
+  <label for="a1">If they say the first thing, you ask:</label>
+  <textarea id="a1" rows="2" placeholder="What is it about that account that makes it more reliable to you?"></textarea>
+
+  <label for="a2">If they say the second thing, you ask:</label>
+  <textarea id="a2" rows="2" placeholder="If you had to pick one to put in a report, which one goes in?"></textarea>
+
+  <label for="a3">If they say the third thing, you ask:</label>
+  <textarea id="a3" rows="2" placeholder="That's what the account claims. What makes you think it's right about that?"></textarea>
+</div>
+
+<div class="note warn">
+  <span class="lbl">Three things that make a next question work</span>
+  <p><b>Don't put the answer inside the question.</b> "Isn't the eyewitness more reliable because they were there?" hands over the reasoning and lets the student agree without thinking. Students take any wording you offer — usually word for word.</p>
+  <p><b>Make it answerable from where they are.</b> A question that needs something they don't have yet produces silence, not thought.</p>
+  <p style="margin-bottom:0"><b>Different answers get different questions.</b> Same question three times is a chatbot. Three different questions is teaching.</p>
+</div>
+
+<div class="note">
+  <span class="lbl">If you're stuck on question 7</span>
+  <ol class="ladder">
+    <li><b>Look back at what's missing.</b> You wrote it in question 6, and the next question is usually hiding in it. "No reason behind it" → <em>what made it the right one for you?</em> "Won't commit" → <em>if you had to pick one, which?</em></li>
+    <li><b>Write a rough one anyway.</b> Even a bad question tells you what the good one needs to do.</li>
+    <li><b>Still stuck? Ask a chatbot — but ask for choices.</b> Paste in your three usual answers and say: <em>for each one, give me three different questions I could ask next. Don't put the answer inside the question, and make the three sets different from each other.</em> Then pick. Asking for one answer means taking it; asking for three means choosing, and the choosing is yours.</li>
+    <li><b>Then check.</b> Are your three questions actually different from each other? That's the thing an AI is most likely to get wrong.</li>
+  </ol>
+  <p style="margin-bottom:0">Use the typical answers you wrote down — not a real student's actual words.</p>
+</div>
+
+<div class="row">
+  <button id="build2" type="button">Assemble it again — with the branch</button>
+  <button id="copy2" type="button" class="ghost">Copy it</button>
+</div>
+
+<hr>
+
+<h2>When you try it: five things to watch for</h2>
+
+<p>Talk to your own bot for ten minutes, and be a difficult student on purpose — a cooperative test student will make anything look like it works. Then watch for these. All five are ordinary and all five are fixable.</p>
+
+<ul class="check">
+  <li><b>It kept pushing after a good answer.</b>
+    <span>The most common one by a wide margin. A student who already said something real gets asked for more, and reads that as "I keep getting this wrong." Tell it plainly: when the answer is good enough to use, say so and move on.</span></li>
+  <li><b>It wrote the student's sentence for them.</b>
+    <span>Watch the summarizing moments especially — "so what you're saying is…" is where a bot quietly upgrades rough words into polished ones and hands them back as theirs. In real transcripts this happens most to the students whose English is least standard, which means the writers who most need their own words are the ones most likely to lose them.</span></li>
+  <li><b>It asked and then answered itself in the same breath.</b>
+    <span>"Do you want to add that? Great, here's the list." That isn't a question, it's an announcement. If a step is supposed to wait for the student, it has to be its own turn.</span></li>
+  <li><b>It said "I hear you, but" and did the thing anyway.</b>
+    <span>That phrase is a reliable signal that two of your instructions collided and you never said which one wins. Don't make either one louder — a tie can't be broken by shouting. Write down which one governs. A good default: if the student says they're done with something, that ends it.</span></li>
+  <li><b>It judged the student instead of the answer.</b>
+    <span>Never ask a bot to decide whether a student is ready, able, or strong enough. It can only see the words on the screen, and fluent-sounding writing reads as good thinking whether or not it is. Judge the turn in front of it, not the person behind it.</span></li>
+</ul>
+
+<hr>
+
+<h2>Six filled-in examples</h2>
+
+<p>Different courses, same questions. Open the closest one to your teaching and change it into yours. Starting from an example isn't cheating — it's faster, and it works.</p>
+
+<details class="ex">
+<summary>Beginning ESL — choosing between two apartments</summary>
+<dl>
+<dt>What it's about</dt>
+<dd>Students see two apartment listings and say which one they'd pick and why. Short — six turns, and speaking the answer is fine.</dd>
+<dt>By the end they have</dt>
+<dd>A choice and one reason, in their own words.</dd>
+<dt>Theirs to figure out</dt>
+<dd>Which apartment fits their own life, and why.</dd>
+<dt>Opening question</dt>
+<dd>"Which apartment would you choose?"</dd>
+<dt>What I'd be thrilled to get</dt>
+<dd>"I pick the second one. It is more money but it is close to the bus. I don't have a car so the bus is important for my job."</dd>
+<dt>What I actually get</dt>
+<dd class="wrong">"The second one is better." <em>No reason at all.</em></dd>
+<dd class="wrong">"The second one because it is nice." <em>A reason word, but nothing specific.</em></dd>
+<dd class="wrong">"The second one has two bedrooms and a parking space." <em>Copies the listing instead of choosing.</em></dd>
+<dt>What I'd ask next</dt>
+<dd>1 → "What makes it better for <em>you</em>?"</dd>
+<dd>2 → "What is one thing about it that is nice?"</dd>
+<dd>3 → "That is what the ad says. Which of those things do you need?"</dd>
+</dl>
+</details>
+
+<details class="ex">
+<summary>High school / HSE social studies — which account to trust</summary>
+<dl>
+<dt>What it's about</dt>
+<dd>After reading two short accounts of the same event, students say which they trust more and why.</dd>
+<dt>By the end they have</dt>
+<dd>A choice and two reasons for it.</dd>
+<dt>Theirs to figure out</dt>
+<dd>What makes a source more or less trustworthy here.</dd>
+<dt>Opening question</dt>
+<dd>"Which of the two accounts did you find more believable?"</dd>
+<dt>What I'd be thrilled to get</dt>
+<dd>"The second one, because the writer was there and they say who else was in the room. The first one doesn't say where they got it from."</dd>
+<dt>What I actually get</dt>
+<dd class="wrong">"The second one, it's more reliable." <em>The judgment with no reasoning under it.</em></dd>
+<dd class="wrong">"They both have good points." <em>Won't commit, so there's nothing to defend.</em></dd>
+<dd class="wrong">"The second one says the first one got the date wrong." <em>Repeats the source instead of judging it.</em></dd>
+<dt>What I'd ask next</dt>
+<dd>1 → "What is it about that one that makes it reliable to you?"</dd>
+<dd>2 → "If you had to put one in a report, which one goes in?"</dd>
+<dd>3 → "That's what it claims. What makes you think it's right about that?"</dd>
+</dl>
+</details>
+
+<details class="ex">
+<summary>Career training — why this order of steps</summary>
+<dl>
+<dt>What it's about</dt>
+<dd>Students can perform the procedure correctly but can't say why the steps go in that order — so they can't adapt when something is different.</dd>
+<dt>By the end they have</dt>
+<dd>A reason for the order that isn't "that's the checklist."</dd>
+<dt>Theirs to figure out</dt>
+<dd>What actually goes wrong if the order changes.</dd>
+<dt>Opening question</dt>
+<dd>"Why does that step come first?"</dd>
+<dt>What I'd be thrilled to get</dt>
+<dd>"You check it first because if you do it after, you've already contaminated the thing you were checking."</dd>
+<dt>What I actually get</dt>
+<dd class="wrong">"Because that's the order on the checklist." <em>Authority, not reasoning.</em></dd>
+<dd class="wrong">"Because it's safer." <em>True and untestable — could be said about any step.</em></dd>
+<dd class="wrong">"I don't know, that's just how we learned it." <em>Honest, and stuck.</em></dd>
+<dt>What I'd ask next</dt>
+<dd>1 → "What would go wrong if you did it the other way around?"</dd>
+<dd>2 → "Safer for who, and from what?"</dd>
+<dd>3 → "Try it out loud — what do you think would happen if you skipped it?"</dd>
+</dl>
+</details>
+
+<details class="ex">
+<summary>Active adults — a decision worth talking through</summary>
+<dl>
+<dt>What it's about</dt>
+<dd>Students talk through a real decision they've made and what they'd tell someone facing the same one. Nothing is graded.</dd>
+<dt>By the end they have</dt>
+<dd>One piece of advice they'd actually give.</dd>
+<dt>Theirs to figure out</dt>
+<dd>What the experience taught them.</dd>
+<dt>Opening question</dt>
+<dd>"What's a decision you made that you still think about?"</dd>
+<dt>What I'd be thrilled to get</dt>
+<dd>"I'd tell them to wait a season before deciding. I moved too fast and I spent a year fixing it."</dd>
+<dt>What I actually get</dt>
+<dd class="wrong">"It worked out fine." <em>Closes the topic instead of opening it.</em></dd>
+<dd class="wrong">"Everybody's different, you have to do what's right for you." <em>True, and it says nothing.</em></dd>
+<dd class="wrong">A long story with no takeaway. <em>Rich material, no conclusion drawn.</em></dd>
+<dt>What I'd ask next</dt>
+<dd>1 → "Was there a moment where it could have gone another way?"</dd>
+<dd>2 → "What was right for <em>you</em>, then?"</dd>
+<dd>3 → "If a friend were about to do the same thing, what's the one thing you'd say?"</dd>
+</dl>
+</details>
+
+<details class="ex">
+<summary>Social science (credit) — defending an interpretation</summary>
+<dl>
+<dt>What it's about</dt>
+<dd>Students state an interpretation of a case and hold it against the strongest counterexample.</dd>
+<dt>By the end they have</dt>
+<dd>A revised claim that survives the counterexample, or a reason it doesn't apply.</dd>
+<dt>Theirs to figure out</dt>
+<dd>Whether the counterexample sinks the claim or narrows it.</dd>
+<dt>Opening question</dt>
+<dd>"Here's the case that cuts against you. What does it do to your claim?"</dd>
+<dt>What I'd be thrilled to get</dt>
+<dd>"That case does cut against me. But it's a different scale, and my claim was about local decisions — so it narrows what I'm saying rather than sinking it."</dd>
+<dt>What I actually get</dt>
+<dd class="wrong">"That's a good point, I hadn't thought of that." <em>Concedes instantly instead of testing.</em></dd>
+<dd class="wrong">Restates the original claim more forcefully. <em>Doesn't engage the counterexample.</em></dd>
+<dd class="wrong">"Well, it depends how you define the terms." <em>Retreats into definitions to avoid the case.</em></dd>
+<dt>What I'd ask next</dt>
+<dd>1 → "Does it sink your claim, or narrow it? What's left standing?"</dd>
+<dd>2 → "Where does that case fit in what you just said?"</dd>
+<dd>3 → "Pick the definition you meant. Does the case still bite?"</dd>
+</dl>
+</details>
+
+<details class="ex">
+<summary>Health &amp; kinesiology (credit) — justifying a recommendation</summary>
+<dl>
+<dt>What it's about</dt>
+<dd>Given a specific case, students recommend an approach and say what would change their mind.</dd>
+<dt>By the end they have</dt>
+<dd>A recommendation, a reason tied to this case, and a condition that would change it.</dd>
+<dt>Theirs to figure out</dt>
+<dd>Which details of the case are doing the work.</dd>
+<dt>Opening question</dt>
+<dd>"What would you start with for this person?"</dd>
+<dt>What I'd be thrilled to get</dt>
+<dd>"I'd start conservative because of the history. If the pain didn't drop in two weeks I'd rethink it — that would tell me I read the cause wrong."</dd>
+<dt>What I actually get</dt>
+<dd class="wrong">The recommendation with no reasoning. <em>Right answer, invisible thinking.</em></dd>
+<dd class="wrong">A textbook rule quoted back. <em>General principle, not applied to this case.</em></dd>
+<dd class="wrong">"Nothing would change my mind." <em>Not a position — an unfalsifiable one.</em></dd>
+<dt>What I'd ask next</dt>
+<dd>1 → "What is it about this case that pointed you there?"</dd>
+<dd>2 → "What in this person's history makes that rule apply?"</dd>
+<dd>3 → "What would you have to see for this to be the wrong call?"</dd>
+</dl>
+</details>
+
+<hr>
+
+<h2>Where to go next</h2>
+
+<p><b>Get an account.</b> Nectir is the district's tool for this. It's free, it's approved for student work, and you write your prompt on the instructor side rather than handing it to students to paste. Sign-up takes a couple of minutes and the account takes a few days to arrive, so do it before you need it.</p>
+<p style="margin-left:1.2rem"><span class="todo">[SIGN-UP LINK GOES HERE]</span></p>
+
+<p><b>Come to the clinic.</b> Same time and day, two weeks out. Bring this sheet and whatever happened when you tried it. Small group, real drafts, nothing to prepare.</p>
+<p style="margin-left:1.2rem"><span class="todo">[CLINIC DATE AND ZOOM LINK GO HERE]</span></p>
+
+<p><b>One rule about student writing.</b> Real student work goes only through the approved tool. When you're testing and tuning your own prompt, make up the student answers yourself — don't paste in real ones. Removing a name isn't enough when the content is personal: a paragraph about someone's family, or the field they're going into, identifies them without the name attached.</p>
+
+<div class="hero" style="margin-top:2rem">
+  <p><b>There's no next level you have to reach.</b> If all you ever do is write down three wrong answers and one question for each, and ask those questions yourself in class, you have gotten the whole idea. The chatbot is a way to do it thirty times at once. It is not the point.</p>
+  <p style="margin-bottom:0">And if you get stuck, send me what you have and what it's doing. Being stuck is the normal middle part.</p>
+</div>
+
+<footer>
+  <p><span class="todo">[YOUR NAME AND EMAIL GO HERE]</span> · Santa Ana College School of Continuing Education</p>
+  <p>Nothing you type here is sent anywhere. Use <b>Save my worksheet</b> to keep a copy with your answers in it.</p>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+  var IDS = ['q1','q2','q3','q4','q5','w1','n1','w2','n2','w3','n3','a1','a2','a3'];
+
+  function val(id){ var el=$(id); return el ? el.value.trim() : ''; }
+  function say(m){ $('status').textContent = m || ''; }
+
+  function assemble(){
+    var about  = val('q1') || '[what this conversation is about]';
+    var ends   = val('q2') || '[what the student should have by the end]';
+    var theirs = val('q3') || '[what the student should work out on their own]';
+    var first  = val('q4') || '[the first question]';
+    var ideal  = val('q5');
+
+    var rows = [
+      { w: val('w1'), n: val('n1'), a: val('a1') },
+      { w: val('w2'), n: val('n2'), a: val('a2') },
+      { w: val('w3'), n: val('n3'), a: val('a3') }
+    ].filter(function(r){ return r.w || r.a; });
+
+    var o = [];
+    o.push('YOUR JOB');
+    o.push('You are a coach. Ask the student one question at a time and wait for their answer.');
+    o.push('Never give the answer yourself, and never write a sentence for them.');
+    o.push('');
+    o.push('WHAT THIS CONVERSATION IS ABOUT');
+    o.push(about);
+    o.push('');
+    o.push('HOW IT ENDS');
+    o.push('The conversation is finished when the student has: ' + ends);
+    o.push('Not before. When you have it, say so plainly and stop.');
+    o.push('');
+    o.push('WHAT THE STUDENT WORKS OUT ON THEIR OWN');
+    o.push(theirs);
+    o.push('You may explain anything I have already taught them. You may not supply the above \u2014');
+    o.push('ask about it instead. Do not rewrite the student\u2019s words into better English. If their');
+    o.push('idea is there but the wording is rough, that counts.');
+    o.push('');
+    o.push('START HERE');
+    o.push(first);
+    o.push('');
+
+    if(ideal){
+      o.push('WHAT A GOOD ANSWER LOOKS LIKE');
+      o.push(ideal);
+      o.push('When the student gives you something this good, say so and move on.');
+      o.push('Do not ask for a better version of an answer that already works.');
+      o.push('');
+    }
+
+    if(rows.length){
+      o.push('SORT THE STUDENT\u2019S ANSWER, THEN ROUTE');
+      o.push('Decide which of these the answer is closest to, then ask the matching question.');
+      o.push('Ask only that one question. Do not explain which category you picked.');
+      o.push('');
+      rows.forEach(function(r){
+        o.push('If the answer is like this: ' + (r.w || '[not filled in]'));
+        if(r.n) o.push('  What it is missing: ' + r.n);
+        o.push('  Ask: ' + (r.a || '[not filled in]'));
+        o.push('');
+      });
+    } else {
+      o.push('WHEN THEY ANSWER');
+      o.push('If the answer is thin, ask one question that gets at what is missing from it.');
+      o.push('If the answer is rough but real, take it and move on.');
+      o.push('');
+      o.push('(Part two of the worksheet replaces this section with something better.)');
+      o.push('');
+    }
+
+    o.push('IF THE STUDENT IS STUCK');
+    o.push('Ask a narrower version of the same question. If that does not work, offer two or three');
+    o.push('short ways they could start a sentence \u2014 and let them pick. If they are still stuck,');
+    o.push('tell them plainly that this is a good thing to bring to a person, and stop.');
+
+    return o.join('\n');
+  }
+
+  function doBuild(){
+    var t = assemble();
+    $('out').textContent = t;
+    $('out').scrollIntoView({ block:'nearest' });
+    var hasBranch = val('w1') || val('a1') || val('w2') || val('a2') || val('w3') || val('a3');
+    say(hasBranch
+      ? 'Assembled, with your branch. Press "Copy it" and paste it into a chatbot.'
+      : 'Assembled. Paste it into a chatbot and be a student for five minutes.');
+  }
+
+  function doCopy(){
+    var t = $('out').textContent || assemble();
+    $('out').textContent = t;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(function(){ say('Copied.'); },
+                                           function(){ fallback(t); });
+    } else { fallback(t); }
+  }
+  function fallback(text){
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly','');
+    ta.style.position='fixed'; ta.style.left='-9999px';
+    document.body.appendChild(ta); ta.select();
+    var ok=false; try{ ok=document.execCommand('copy'); }catch(e){ ok=false; }
+    document.body.removeChild(ta);
+    say(ok ? 'Copied.' : 'Select the text above and copy it.');
+  }
+
+  $('build').addEventListener('click', doBuild);
+  $('build2').addEventListener('click', function(){
+    doBuild();
+    $('out').scrollIntoView({ behavior:'smooth', block:'center' });
+  });
+  $('copy').addEventListener('click', doCopy);
+  $('copy2').addEventListener('click', doCopy);
+  $('print').addEventListener('click', function(){ window.print(); });
+
+  $('save').addEventListener('click', function(){
+    IDS.forEach(function(id){
+      var el = $(id); if(!el) return;
+      if(el.tagName === 'TEXTAREA'){ el.textContent = el.value; }
+      else { el.setAttribute('value', el.value); }
+    });
+    var doc = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    var blob = new Blob([doc], { type:'text/html' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'my-socratic-worksheet.html';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    say('Saved. Open that file any time \u2014 your answers are in it.');
+  });
+})();
+</script>
+</body>
+</html>
