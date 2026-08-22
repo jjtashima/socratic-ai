@@ -59,7 +59,10 @@
   .steps b{display:block}
 
   .pill{display:inline-block; background:#fdf2c8; border-bottom:2px dotted var(--gold);
-        padding:0 .3rem; font-weight:600}
+        padding:0 .3rem; font-weight:600; color:inherit; text-decoration:none;
+        max-width:100%; overflow-wrap:anywhere; word-break:break-word}
+  a.pill:hover{border-bottom-style:solid}
+  a.pill:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
 
   footer{border-top:1px solid var(--rule); margin-top:3rem; padding:1.6rem 2rem 3rem;
          color:var(--slate); font-size:.92rem}
@@ -116,7 +119,7 @@
 
 <div class="card g" style="cursor:default">
   <div class="t">The recording</div>
-  <div class="d"><span class="pill">https://rsccd-edu.zoom.us/rec/share/M0LInaWbUZ62jkx0vf8RqAmHPKMrrt26gWGEKGfbW8UXRr4bntmaD9j33vdzGtM8.KX5x4qh1_RWL1olp?startTime=1786737397000</span></div>
+  <div class="d"><a class="pill" href="https://rsccd-edu.zoom.us/rec/share/M0LInaWbUZ62jkx0vf8RqAmHPKMrrt26gWGEKGfbW8UXRr4bntmaD9j33vdzGtM8.KX5x4qh1_RWL1olp?startTime=1786737397000">Watch the recording</a></div>
 </div>
 
 <h2>The follow-up clinic</h2>
@@ -125,7 +128,7 @@
 
 <p>Bring your worksheet and whatever happened when you tried it — <em>especially</em> if it went badly. That's the more useful kind. Nothing to prepare.</p>
 
-<p><span class="pill">https://rsccd-edu.zoom.us/meeting/register/ums-iy5zTcSk8oNLN0FhCg</span></p>
+<p><a class="pill" href="https://rsccd-edu.zoom.us/meeting/register/ums-iy5zTcSk8oNLN0FhCg">Register for the clinic</a></p>
 
 <p>If your Nectir account hasn't come through yet, come anyway.</p>
 
