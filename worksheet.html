@@ -108,7 +108,11 @@
   ul.check b{display:block; margin-bottom:.15rem}
   ul.check span{color:var(--slate); font-size:.95rem}
 
-  .todo{background:#fdf2c8; padding:0 .25rem; border-bottom:2px dotted var(--gold)}
+  .todo{background:#fdf2c8; padding:0 .25rem; border-bottom:2px dotted var(--gold);
+        color:inherit; text-decoration:none; max-width:100%;
+        overflow-wrap:anywhere; word-break:break-word}
+  a.todo:hover{border-bottom-style:solid}
+  a.todo:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
   footer{margin-top:3rem; color:var(--slate); font-size:.9rem}
 
   @media (max-width:640px){.sheet{padding:1.5rem 1.1rem 3rem} h1{font-size:2rem} .qtext{font-size:1.25rem}}
@@ -469,10 +473,10 @@
 <h2>Where to go next</h2>
 
 <p><b>Get an account.</b> Nectir is the district's tool for this. It's free, it's approved for student work, and you write your prompt on the instructor side rather than handing it to students to paste. Sign-up takes a couple of minutes and the account takes a few days to arrive, so do it before you need it.</p>
-<p style="margin-left:1.2rem"><span class="todo">[SIGN-UP LINK GOES HERE]</span></p>
+<p style="margin-left:1.2rem"><a class="todo" href="https://docs.google.com/forms/d/e/1FAIpQLSfzqUNzLDefoMZknzem1V6J61_utAJTh0oDp4E8BIN-sIeX7Q/viewform">Request a Nectir account</a></p>
 
 <p><b>Come to the clinic.</b> Same time and day, two weeks out. Bring this sheet and whatever happened when you tried it. Small group, real drafts, nothing to prepare.</p>
-<p style="margin-left:1.2rem"><span class="todo">[CLINIC DATE AND ZOOM LINK GO HERE]</span></p>
+<p style="margin-left:1.2rem">Friday, August 28 · 2–4 p.m. — <a class="todo" href="https://rsccd-edu.zoom.us/meeting/register/ums-iy5zTcSk8oNLN0FhCg">Register for the clinic</a></p>
 
 <p><b>One rule about student writing.</b> Real student work goes only through the approved tool. When you're testing and tuning your own prompt, make up the student answers yourself — don't paste in real ones. Removing a name isn't enough when the content is personal: a paragraph about someone's family, or the field they're going into, identifies them without the name attached.</p>
 
@@ -482,7 +486,7 @@
 </div>
 
 <footer>
-  <p><span class="todo">[YOUR NAME AND EMAIL GO HERE]</span> · Santa Ana College School of Continuing Education</p>
+  <p><span class="todo">John Tashima</span> · <span class="todo">tashima_john@sac.edu</span> · Santa Ana College School of Continuing Education</p>
   <p>Nothing you type here is sent anywhere. Use <b>Save my worksheet</b> to keep a copy with your answers in it.</p>
 </footer>
 
