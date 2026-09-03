@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Socratic AI Tutoring — workshop materials</title>
-<meta name="description" content="Materials from the Socratic AI Tutoring workshop: slides, worksheet, and a sample coach prompt you can copy and run.">
+<title>Socratic AI Tutoring — materials</title>
+<meta name="description" content="Worksheet, sample prompt, slides, and recordings for designing AI conversations students can't finish without doing the thinking themselves.">
 <style>
   :root{
     --ink:#1a1613; --crimson:#9A0100; --cream:#FFF8E1; --teal:#0F6E7E;
@@ -27,9 +27,10 @@
   .held{height:4px; width:5.5rem; background:var(--cream); margin:1rem 0 1.1rem; border-radius:2px}
 
   main{padding:2rem}
-  h2{font-family:var(--display); font-weight:400; font-size:1.65rem;
-     margin:2.6rem 0 .5rem; color:var(--crimson)}
-  h2:first-child{margin-top:0}
+  h2{font-family:var(--display); font-weight:400; font-size:1.6rem;
+     margin:2.8rem 0 .3rem; color:var(--crimson)}
+  h2:first-of-type{margin-top:.5rem}
+  .sect{font-size:.95rem; color:var(--slate); margin:0 0 1.1rem}
   p{margin:0 0 1rem}
   .lede{font-size:1.05rem; color:var(--slate)}
 
@@ -41,28 +42,28 @@
   .card:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
   .card.c{border-left-color:var(--crimson)}
   .card.g{border-left-color:var(--gold)}
-  .card .t{font-family:var(--display); font-size:1.35rem; line-height:1.15; color:var(--crimson)}
-  .card .d{font-size:.97rem; color:var(--slate); margin-top:.3rem}
+  .card .t{font-family:var(--display); font-size:1.32rem; line-height:1.15; color:var(--crimson)}
+  .card .d{font-size:.96rem; color:var(--slate); margin-top:.3rem}
   .card .go{font-size:.8rem; font-weight:700; letter-spacing:.1em;
             text-transform:uppercase; color:var(--teal); margin-top:.6rem}
+
+  .pair{display:flex; gap:.9rem; flex-wrap:wrap}
+  .pair .card{flex:1 1 15rem; margin-bottom:.9rem}
 
   .note{background:var(--cream); border-left:5px solid var(--gold);
         padding:1rem 1.2rem; margin:1.4rem 0}
   .note p:last-child{margin-bottom:0}
   .note b{color:var(--gold)}
 
-  .steps{counter-reset:s; list-style:none; padding:0; margin:1rem 0}
-  .steps li{counter-increment:s; position:relative; padding-left:2.6rem; margin-bottom:1rem}
-  .steps li::before{content:counter(s); position:absolute; left:0; top:.05rem;
+  ol.steps{counter-reset:s; list-style:none; padding:0; margin:1rem 0}
+  ol.steps li{counter-increment:s; position:relative; padding-left:2.6rem; margin-bottom:1rem}
+  ol.steps li::before{content:counter(s); position:absolute; left:0; top:.05rem;
     width:1.8rem; height:1.8rem; border-radius:50%; background:var(--crimson); color:#fff;
     font-weight:700; font-size:.95rem; display:flex; align-items:center; justify-content:center}
-  .steps b{display:block}
+  ol.steps b{display:block}
 
   .pill{display:inline-block; background:#fdf2c8; border-bottom:2px dotted var(--gold);
-        padding:0 .3rem; font-weight:600; color:inherit; text-decoration:none;
-        max-width:100%; overflow-wrap:anywhere; word-break:break-word}
-  a.pill:hover{border-bottom-style:solid}
-  a.pill:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
+        padding:0 .3rem; font-weight:600}
 
   footer{border-top:1px solid var(--rule); margin-top:3rem; padding:1.6rem 2rem 3rem;
          color:var(--slate); font-size:.92rem}
@@ -79,7 +80,7 @@
 <div class="wrap">
 
 <header>
-  <div class="kicker">Faculty workshop · SAC &amp; SCC</div>
+  <div class="kicker">Santa Ana College &amp; Santiago Canyon College</div>
   <h1>Socratic AI Tutoring</h1>
   <div class="held"></div>
   <p>Designing AI conversations students can't finish without doing the thinking themselves.</p>
@@ -87,9 +88,10 @@
 
 <main>
 
-<p class="lede">Everything from the session is here. Nothing needs an account, and nothing expires. If you're finding this page cold — you didn't miss anything you can't pick up from the worksheet.</p>
+<p class="lede">Everything from both sessions is here. Nothing needs an account and nothing expires. If you're finding this page cold, start with the worksheet — you don't need to have been there.</p>
 
 <h2>Start here</h2>
+<p class="sect">What you use.</p>
 
 <a class="card c" href="worksheet.html">
   <div class="t">Build one — the worksheet</div>
@@ -99,42 +101,58 @@
 
 <a class="card" href="prompt.html">
   <div class="t">The sample coach prompt</div>
-  <div class="d">The one we used in the session. Copy it, paste it into any chatbot, and be the student for ten minutes. About three hundred words of plain English — that's the whole tutor.</div>
+  <div class="d">The one we used in both sessions. Copy it, paste it into any chatbot, and be the student for ten minutes. About three hundred words of plain English — that's the whole tutor.</div>
   <div class="go">Copy the prompt →</div>
 </a>
 
 <div class="note">
   <p><b>You don't need an account to try this.</b> <b style="color:var(--ink)">chatgpt.com</b> and <b style="color:var(--ink)">gemini.google.com</b> both open without signing up. Fine for testing your own prompt and making up practice conversations.</p>
   <p><b>For anything a student actually writes, use Nectir</b> — it's free, it's approved for student work, and you write the prompt on the instructor side. It doesn't need Canvas or any LMS.</p>
-  <p><a href="https://docs.google.com/forms/d/e/1FAIpQLSfzqUNzLDefoMZknzem1V6J61_utAJTh0oDp4E8BIN-sIeX7Q/viewform">Request a Nectir account</a> — about two minutes, and the account takes a few days.</p>
+  <p><a href="https://docs.google.com/forms/d/e/1FAIpQLSfzqUNzLDefoMZknzem1V6J61_utAJTh0oDp4E8BIN-sIeX7Q/viewform">Request a Nectir account</a> — about two minutes, and the account takes a few days to arrive.</p>
 </div>
 
-<h2>From the session</h2>
+<h2>For your students</h2>
+<p class="sect">What you hand them.</p>
 
-<a class="card g" href="deck.html">
-  <div class="t">The slides</div>
-  <div class="d">The whole deck, in your browser. Arrow keys to move, or press <b>?</b> for the rest of the shortcuts.</div>
-  <div class="go">Open the slides →</div>
+<a class="card g" href="https://course-api-1064985737178.us-west2.run.app/comp2/activities/nectir-transcript-download-tutorial.html">
+  <div class="t">How to turn in a conversation</div>
+  <div class="d">A short walkthrough showing students how to save a Nectir conversation and hand it in. Give them the link rather than explaining it — it saves you the same three emails every semester.</div>
+  <div class="go">Open the walkthrough →</div>
 </a>
 
-<div class="card g" style="cursor:default">
-  <div class="t">The recording</div>
-  <div class="d"><a class="pill" href="https://rsccd-edu.zoom.us/rec/share/M0LInaWbUZ62jkx0vf8RqAmHPKMrrt26gWGEKGfbW8UXRr4bntmaD9j33vdzGtM8.KX5x4qh1_RWL1olp?startTime=1786737397000">Watch the recording</a></div>
+<h2>From the sessions</h2>
+<p class="sect">What you review, or catch up on.</p>
+
+<div class="pair">
+  <a class="card" href="deck.html">
+    <div class="t">Session one — slides</div>
+    <div class="d">What a Socratic tutor is, what you get to see in one, and what makes a prompt teach instead of chat.</div>
+    <div class="go">Open →</div>
+  </a>
+  <a class="card" href="clinic-deck.html">
+    <div class="t">Session two — slides</div>
+    <div class="d">Build One. Getting one running, the five attacks, and what goes wrong once real students are in it.</div>
+    <div class="go">Open →</div>
+  </a>
 </div>
 
-<h2>The follow-up clinic</h2>
+<div class="pair">
+  <a class="card g" href="https://rsccd-edu.zoom.us/rec/share/jZ-74cgBh2dlN5uXpNpatx8SLwYtqCNCC7eXZAv2oY_rcXzII74oRs2ShcO8SFD8.A7VgdIcK3yQBl2bq?startTime=1786737397000">
+    <div class="t">Session one — recording</div>
+    <div class="d">The introduction. What the technique is, why it has never scaled, and what you get to see in a conversation.</div>
+    <div class="go">Watch →</div>
+  </a>
+  <a class="card g" href="https://rsccd-edu.zoom.us/rec/share/hVB8k6anixFB-h5TGZQPT3gSpdQSJUtKiX6Jun7SzKjCLwU2DCwzUD-C0KtIKub7.xIlB5azbw97Q4ZAq">
+    <div class="t">Session two — recording</div>
+    <div class="d">Build One, the hands-on session. The building starts about ten minutes in if you'd rather skip the framing.</div>
+    <div class="go">Watch →</div>
+  </a>
+</div>
 
-<p><b>Friday, August 28 · 2–4 p.m.</b> Small group, drop in and out as you need.</p>
-
-<p>Bring your worksheet and whatever happened when you tried it — <em>especially</em> if it went badly. That's the more useful kind. Nothing to prepare.</p>
-
-<p><a class="pill" href="https://rsccd-edu.zoom.us/meeting/register/ums-iy5zTcSk8oNLN0FhCg">Register for the clinic</a></p>
-
-<p>If your Nectir account hasn't come through yet, come anyway.</p>
+<p class="sect" style="margin-top:.2rem">Two hours each. Both open in Zoom — if you're asked for a passcode, email me.</p>
 
 <h2>The three things</h2>
-
-<p>If you remember nothing else from the session:</p>
+<p class="sect">If you remember nothing else.</p>
 
 <ol class="steps">
   <li><b>Say what the conversation should produce.</b> It ends when a thing exists — not when the student runs out of steam.</li>
@@ -142,11 +160,21 @@
   <li><b>Tell it to take a good answer when it gets one.</b> The most common failure isn't being too easy. It's being too relentless.</li>
 </ol>
 
-<h2>Two things worth knowing before you use it with students</h2>
+<h2>Before you use it with students</h2>
 
 <p><b>Somebody will eventually tell it something serious.</b> If the hard thing is the subject of the work — something they lived through and are writing about — one warm sentence, then keep coaching. If it's about right now, stop coaching, stay warm, don't probe, and name a person. And put the real offices and phone numbers in the prompt itself; left to improvise, it will invent plausible wrong ones.</p>
 
 <p><b>Real student writing goes only through the approved tool.</b> When you're testing your own prompt, make up the student answers yourself. Taking the name off isn't enough — a paragraph about someone's family, or the field they're going into, identifies them without it.</p>
+
+<p><b>Have the bot say what it is before it starts.</b> "I'm the coach for the Essay 2 outline — is that what you're working on?" Three sentences at the top of the prompt, and it takes care of most of the students who click the wrong link.</p>
+
+<h2>What I'd like to see happen next</h2>
+
+<p>None of us should be doing this alone. Most of what I've found isn't specific to composition, and I found it one thing at a time over about a year.</p>
+
+<p><b>Trade prompts inside your discipline.</b> A prompt that works for your students almost certainly works for a colleague's with the subject swapped out.</p>
+
+<p><b>And split the reading.</b> The part that takes real time isn't writing the prompt — it's reading the conversations afterward and noticing what broke. That doesn't have to be everybody every month. One person reads theirs and tells the rest what they found. Somebody else does it next time. Nobody has to do the whole loop; the loop just has to happen somewhere.</p>
 
 <div class="note">
   <p><b>There's no next level you have to reach.</b> If all you ever do is write down three wrong answers and one question for each, and ask those questions yourself in class, you've got the whole idea. The chatbot is a way to do it thirty times at once. It isn't the point.</p>
@@ -155,8 +183,8 @@
 </main>
 
 <footer>
-  <p><span class="pill">John Tashima</span> · Santa Ana College School of Continuing Education<br>
-  <span class="pill">tashima_john@sac.edu</span></p>
+  <p>John Tashima · Santa Ana College School of Continuing Education<br>
+  <a href="mailto:tashima_john@sac.edu">tashima_john@sac.edu</a></p>
   <p>Send me what you have and what it's doing — especially if it's doing something strange. Being stuck is the normal middle part.</p>
 </footer>
 
