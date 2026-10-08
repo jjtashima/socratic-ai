@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Build a Prompt Contract</title>
+<meta name="description" content="Answer four questions about your own work and get a working Socratic AI prompt you can paste into any assistant.">
+<style>
+  :root{
+    --crimson:#9A0100;
+    --teal:#0F6E7E;
+    --ink:#1A1A1A;
+    --slate:#454545;
+    --card:#F2F2F2;
+    --line:#D6D6D6;
+    --bg:#FFFFFF;
+    --focus:#0B4FA8;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    padding:0 0 3rem;
+    background:var(--bg);
+    color:var(--ink);
+    font:400 1.0625rem/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Calibri,Arial,sans-serif;
+    padding-top:env(safe-area-inset-top,0);
+  }
+  .wrap{max-width:44rem;margin:0 auto;padding:1.25rem 1.1rem}
+  header{border-bottom:3px solid var(--crimson);padding-bottom:.85rem;margin-bottom:1.25rem}
+  h1{font-size:1.5rem;line-height:1.25;margin:0 0 .3rem;color:var(--crimson)}
+  .sub{margin:0;color:var(--slate);font-size:.98rem}
+
+  .progress{display:flex;align-items:center;gap:.6rem;margin:0 0 1.1rem}
+  .bar{flex:1;height:.55rem;background:var(--card);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+  .bar>span{display:block;height:100%;background:var(--teal);width:0;transition:width .2s ease}
+  .count{font-size:.9rem;color:var(--slate);white-space:nowrap}
+
+  .step{display:none}
+  .step.on{display:block}
+  body.all-steps .step{display:block;border-top:1px solid var(--line);padding-top:1.4rem;margin-top:1.4rem}
+  body.all-steps .nav{display:none}
+  body.all-steps .progress{display:none}
+
+  h2{font-size:1.2rem;line-height:1.3;margin:0 0 .5rem;color:var(--crimson)}
+  h2:focus{outline:3px solid var(--focus);outline-offset:4px}
+  .hint{color:var(--slate);margin:.2rem 0 1rem;font-size:.98rem}
+  .example{background:var(--card);border-radius:.5rem;padding:.85rem 1rem;margin:0 0 1.1rem}
+  .example p{margin:.25rem 0}
+  .example .lbl{font-weight:700;color:var(--teal);font-size:.9rem;text-transform:none;margin-bottom:.35rem}
+
+  label{display:block;font-weight:700;margin:1rem 0 .35rem;font-size:1rem}
+  textarea,input[type=text]{
+    width:100%;font:inherit;font-size:1.0625rem;color:var(--ink);
+    padding:.7rem .75rem;border:2px solid var(--line);border-radius:.5rem;background:#fff;
+  }
+  textarea{min-height:5.5rem;resize:vertical}
+  textarea:focus,input:focus,button:focus{outline:3px solid var(--focus);outline-offset:2px}
+
+  .nav{display:flex;gap:.7rem;margin-top:1.6rem;flex-wrap:wrap}
+  button{
+    font:inherit;font-weight:700;font-size:1.0625rem;cursor:pointer;
+    padding:.75rem 1.3rem;border-radius:.5rem;border:2px solid var(--crimson);
+    background:var(--crimson);color:#fff;min-height:2.9rem;
+  }
+  button.ghost{background:#fff;color:var(--crimson)}
+  button[disabled]{opacity:.45;cursor:not-allowed}
+
+  pre#out{
+    white-space:pre-wrap;word-wrap:break-word;
+    background:var(--card);border:1px solid var(--line);border-radius:.5rem;
+    padding:1rem;font:400 .95rem/1.5 ui-monospace,SFMono-Regular,Consolas,"Courier New",monospace;
+    margin:0 0 1rem;
+  }
+  .status{margin:.6rem 0 0;font-weight:700;color:var(--teal)}
+  .note{font-size:.92rem;color:var(--slate);margin-top:1.5rem;border-top:1px solid var(--line);padding-top:1rem}
+  a{color:var(--teal)}
+  .visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  @media print{.nav,.progress,header .sub{display:none}.step{display:block!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Build a Prompt Contract</h1>
+  <p class="sub">Four questions about your own work. Your answers become a working Socratic prompt you can paste into any AI.</p>
+</header>
+
+<div class="progress">
+  <div class="bar" role="presentation"><span id="barfill"></span></div>
+  <p class="count" id="count" aria-live="polite">Step 1 of 6</p>
+</div>
+
+<form id="builder" novalidate>
+
+<!-- 0 -->
+<section class="step on" id="s0" role="group" aria-labelledby="h0">
+  <h2 id="h0" tabindex="-1">Before you start</h2>
+  <p class="hint">A prompt is a block of written instructions you paste into an AI before anyone starts typing. The student never sees it. This page writes one for you.</p>
+  <div class="example">
+    <p class="lbl">What happens here</p>
+    <p>You answer four questions. Nothing is sent anywhere &mdash; everything stays in your browser. At the end you get text you can copy.</p>
+  </div>
+  <p class="hint">It takes about ten minutes. There are no wrong answers, and you can change anything afterwards.</p>
+</section>
+
+<!-- 1 -->
+<section class="step" id="s1" role="group" aria-labelledby="h1q">
+  <h2 id="h1q" tabindex="-1">Question 1 &mdash; the moment</h2>
+  <p class="hint">Name one moment in your work where someone should be reasoning, and often is not.</p>
+  <div class="example">
+    <p class="lbl">A worked example</p>
+    <p>You ask someone why they chose what they chose, and the answer is not wrong. It is just empty.</p>
+  </div>
+  <label for="q1">Your moment</label>
+  <textarea id="q1" name="q1" placeholder="One or two sentences."></textarea>
+</section>
+
+<!-- 2 -->
+<section class="step" id="s2" role="group" aria-labelledby="h2q">
+  <h2 id="h2q" tabindex="-1">Question 2 &mdash; the answer you want</h2>
+  <p class="hint">Write the answer you would be thrilled to get. Be specific. If you cannot write it down, the AI has nothing to aim at.</p>
+  <div class="example">
+    <p class="lbl">A worked example</p>
+    <p>&ldquo;I picked this one because I have actually watched it go wrong. My sister did exactly that and it cost her a semester.&rdquo;</p>
+  </div>
+  <label for="q2">Your target answer</label>
+  <textarea id="q2" name="q2" placeholder="One or two sentences, in a real voice."></textarea>
+</section>
+
+<!-- 3 -->
+<section class="step" id="s3" role="group" aria-labelledby="h3q">
+  <h2 id="h3q" tabindex="-1">Question 3 &mdash; what you actually get</h2>
+  <p class="hint">Write the three answers you get instead. Not the worst ones &mdash; the most common ones. The three you could predict before you opened the assignment.</p>
+  <div class="example">
+    <p class="lbl">Worked examples</p>
+    <p>&ldquo;Because it is important.&rdquo; &mdash; a reason with no reasoning in it.</p>
+    <p>A restatement of the question in different words.</p>
+    <p>&ldquo;I don&rsquo;t know, what do you think?&rdquo;</p>
+  </div>
+  <label for="q3a">Common answer 1</label>
+  <input type="text" id="q3a" name="q3a" placeholder="What they actually say">
+  <label for="q3b">Common answer 2</label>
+  <input type="text" id="q3b" name="q3b" placeholder="What they actually say">
+  <label for="q3c">Common answer 3</label>
+  <input type="text" id="q3c" name="q3c" placeholder="What they actually say">
+</section>
+
+<!-- 4 -->
+<section class="step" id="s4" role="group" aria-labelledby="h4q">
+  <h2 id="h4q" tabindex="-1">Question 4 &mdash; what you would ask next</h2>
+  <p class="hint">For each answer you just wrote, one question you would ask next. Just the next question &mdash; not a plan, not a lesson.</p>
+  <div class="example">
+    <p class="lbl">Worked examples</p>
+    <p>For &ldquo;because it is important&rdquo; &mdash; &ldquo;Important to who? Name one person.&rdquo;</p>
+    <p>For a restatement &mdash; &ldquo;You told me what it says. What do you think about it?&rdquo;</p>
+    <p>For &ldquo;I don&rsquo;t know&rdquo; &mdash; &ldquo;Forget the assignment for a second. What would you tell a friend?&rdquo;</p>
+  </div>
+  <label for="q4a">If they say: <span id="echoA" class="echo">(your first answer)</span></label>
+  <input type="text" id="q4a" name="q4a" placeholder="The one question you would ask next">
+  <label for="q4b">If they say: <span id="echoB" class="echo">(your second answer)</span></label>
+  <input type="text" id="q4b" name="q4b" placeholder="The one question you would ask next">
+  <label for="q4c">If they say: <span id="echoC" class="echo">(your third answer)</span></label>
+  <input type="text" id="q4c" name="q4c" placeholder="The one question you would ask next">
+</section>
+
+<!-- 5 -->
+<section class="step" id="s5" role="group" aria-labelledby="h5q">
+  <h2 id="h5q" tabindex="-1">Your Prompt Contract</h2>
+  <p class="hint">Copy this, paste it into any AI, and start the conversation underneath it. Then run it on yourself, answering the way your most reluctant student would.</p>
+  <pre id="out" tabindex="0" aria-label="Your assembled prompt contract"></pre>
+  <div class="nav">
+    <button type="button" id="copy">Copy the prompt</button>
+    <button type="button" class="ghost" id="restart">Start over</button>
+  </div>
+  <p class="status" id="copystatus" role="status"></p>
+</section>
+
+<div class="nav" id="nav">
+  <button type="button" class="ghost" id="back" disabled>Back</button>
+  <button type="button" id="next">Start</button>
+</div>
+
+</form>
+
+<p class="note">
+  Nothing you type leaves your device. Your answers are kept in this browser only, so you can close the page and come back.
+  Prefer to see all four questions at once? <a href="?all=1">Open the single-page version</a>.
+</p>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var steps = ["s0","s1","s2","s3","s4","s5"].map(function(id){return document.getElementById(id);});
+  var heads = ["h0","h1q","h2q","h3q","h4q","h5q"].map(function(id){return document.getElementById(id);});
+  var i = 0;
+  var back = document.getElementById("back");
+  var next = document.getElementById("next");
+  var count = document.getElementById("count");
+  var fill = document.getElementById("barfill");
+  var fields = ["q1","q2","q3a","q3b","q3c","q4a","q4b","q4c"];
+  var KEY = "prompt-contract-v1";
+
+  // Single-page mode: ?all=1
+  if (/[?&]all=1/.test(location.search)) {
+    document.body.className = "all-steps";
+  }
+
+  function val(id){ var el=document.getElementById(id); return el ? el.value.trim() : ""; }
+
+  function save(){
+    try{
+      var o={}; fields.forEach(function(f){o[f]=val(f);});
+      localStorage.setItem(KEY, JSON.stringify(o));
+    }catch(e){ /* private browsing, quota, etc. — silently continue */ }
+  }
+  function load(){
+    try{
+      var raw = localStorage.getItem(KEY);
+      if(!raw) return;
+      var o = JSON.parse(raw);
+      fields.forEach(function(f){ if(o[f] && document.getElementById(f)) document.getElementById(f).value = o[f]; });
+    }catch(e){}
+  }
+
+  function echo(){
+    var map = {echoA:"q3a", echoB:"q3b", echoC:"q3c"};
+    var fallback = {echoA:"(your first answer)", echoB:"(your second answer)", echoC:"(your third answer)"};
+    Object.keys(map).forEach(function(k){
+      var v = val(map[k]);
+      document.getElementById(k).textContent = v ? "\u201C" + v + "\u201D" : fallback[k];
+    });
+  }
+
+  function assemble(){
+    var pairs = [["q3a","q4a"],["q3b","q4b"],["q3c","q4c"]];
+    var routes = pairs.map(function(p,n){
+      var a = val(p[0]), b = val(p[1]);
+      if(!a && !b) return "";
+      return (n+1) + ". If the student says something like \u201C" + (a || "[answer " + (n+1) + "]") +
+             "\u201D, ask: \u201C" + (b || "[your next question]") + "\u201D";
+    }).filter(Boolean).join("\n");
+
+    return [
+"You are coaching a student who is working on their own thinking. The student writes to you directly.",
+"",
+"Do not give the student the answer. Coach by asking one question at a time until they get there themselves.",
+"",
+"RULES",
+"- Never supply the answer or the reasoning. Ask a question instead.",
+"- Never rewrite the student's sentence. Quote their own words back to them.",
+"- Judge only whether the student has added a new idea. Ignore grammar, spelling and word choice entirely when deciding whether they understand.",
+"- Ask one question per message, then stop and wait.",
+"",
+"THE MOMENT WE ARE WORKING ON",
+val("q1") || "[the moment you named]",
+"",
+"AN ANSWER GOOD ENOUGH TO MOVE ON FROM",
+val("q2") || "[the answer you would be thrilled to get]",
+"",
+"HOW TO DECIDE WHAT TO DO NEXT",
+"Before you reply, decide whether the student's answer is a real answer or an empty one. There is no middle category.",
+"- If it is a real answer: say what is good about it, in the student's own words, then ask about something else. Never ask again about the same point.",
+"- If it is empty: ask one more question. If the next answer is still empty, ask about something else anyway.",
+"",
+"WHAT TO EXPECT, AND WHAT TO ASK",
+routes || "[your three common answers and the question you would ask after each]",
+"",
+"Stop pressing when the student gives you something real. Do not stop asking."
+].join("\n");
+  }
+
+  function render(){
+    steps.forEach(function(s,n){ s.classList.toggle("on", n===i); });
+    count.textContent = "Step " + (i+1) + " of " + steps.length;
+    fill.style.width = Math.round((i/(steps.length-1))*100) + "%";
+    back.disabled = (i===0);
+    next.textContent = (i===0) ? "Start" : (i===steps.length-2 ? "Build my prompt" : "Next");
+    next.style.display = (i===steps.length-1) ? "none" : "";
+    if(i===4) echo();
+    if(i===steps.length-1) document.getElementById("out").textContent = assemble();
+    heads[i].focus();
+    window.scrollTo(0,0);
+  }
+
+  next.addEventListener("click", function(){ if(i<steps.length-1){ save(); i++; render(); }});
+  back.addEventListener("click", function(){ if(i>0){ save(); i--; render(); }});
+
+  fields.forEach(function(f){
+    var el = document.getElementById(f);
+    if(el) el.addEventListener("input", function(){ save(); if(f.indexOf("q3")===0) echo(); });
+  });
+
+  document.getElementById("copy").addEventListener("click", function(){
+    var text = document.getElementById("out").textContent;
+    var status = document.getElementById("copystatus");
+    function fallbackCopy(){
+      var ta = document.createElement("textarea");
+      ta.value = text; ta.setAttribute("readonly","");
+      ta.style.position="fixed"; ta.style.opacity="0";
+      document.body.appendChild(ta); ta.select();
+      try{ document.execCommand("copy"); status.textContent = "Copied."; }
+      catch(e){ status.textContent = "Could not copy automatically \u2014 select the text above and copy it."; }
+      document.body.removeChild(ta);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ status.textContent = "Copied."; }, fallbackCopy);
+    } else { fallbackCopy(); }
+  });
+
+  document.getElementById("restart").addEventListener("click", function(){
+    if(!confirm("Clear all four answers and start again?")) return;
+    fields.forEach(function(f){ var el=document.getElementById(f); if(el) el.value=""; });
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    echo(); i=0; render();
+  });
+
+  load();
+  echo();
+  if(document.body.className === "all-steps"){
+    document.getElementById("out").textContent = assemble();
+    fields.forEach(function(f){
+      var el=document.getElementById(f);
+      if(el) el.addEventListener("input", function(){ document.getElementById("out").textContent = assemble(); });
+    });
+  } else {
+    render();
+  }
+})();
+</script>
+</body>
+</html>
