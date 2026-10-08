@@ -69,6 +69,19 @@
          color:var(--slate); font-size:.92rem}
   footer a{color:var(--teal)}
 
+  details.sessions{border:1px solid var(--rule); border-left:6px solid var(--slate);
+         border-radius:0; background:#fff; margin:2.4rem 0 .5rem}
+  details.sessions>summary{cursor:pointer; list-style:none; padding:1rem 1.3rem;
+         font-family:var(--display); font-size:1.4rem; color:var(--crimson);
+         display:flex; align-items:center; gap:.5rem}
+  details.sessions>summary::-webkit-details-marker{display:none}
+  details.sessions>summary::before{content:"\25B8"; color:var(--slate);
+         font-family:var(--sans); font-size:1rem}
+  details.sessions[open]>summary::before{content:"\25BE"}
+  details.sessions>summary:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
+  details.sessions .inner{padding:0 1.3rem 1.3rem}
+  details.sessions .inner .sect{margin:.2rem 0 1.1rem}
+
   @media (max-width:600px){
     header{padding:1.8rem 1.2rem 1.6rem} header h1{font-size:2.1rem}
     main{padding:1.4rem 1.2rem} footer{padding:1.4rem 1.2rem 2.5rem}
@@ -88,7 +101,7 @@
 
 <main>
 
-<p class="lede">Everything from both sessions is here. Nothing needs an account and nothing expires. If you're finding this page cold, start with the worksheet — you don't need to have been there.</p>
+<p class="lede">Everything you need is here. Nothing needs an account and nothing expires. If you're finding this page cold, start with the worksheet — you don't need to have been anywhere.</p>
 
 <h2>Start here</h2>
 <p class="sect">What you use.</p>
@@ -101,7 +114,7 @@
 
 <a class="card" href="prompt.html">
   <div class="t">The sample coach prompt</div>
-  <div class="d">The one we used in both sessions. Copy it, paste it into any chatbot, and be the student for ten minutes. About three hundred words of plain English — that's the whole tutor.</div>
+  <div class="d">Copy it, paste it into any chatbot, and be the student for ten minutes. About three hundred words of plain English — that's the whole tutor.</div>
   <div class="go">Copy the prompt →</div>
 </a>
 
@@ -120,8 +133,10 @@
   <div class="go">Open the walkthrough →</div>
 </a>
 
-<h2>From the sessions</h2>
-<p class="sect">What you review, or catch up on.</p>
+<details class="sessions">
+<summary>From the faculty workshops (SAC &amp; SCC, Spring 2026)</summary>
+<div class="inner">
+<p class="sect">Slides and recordings from the two live sessions this material came out of. Not needed to use anything above — here if you want to review or catch up.</p>
 
 <div class="pair">
   <a class="card" href="deck.html">
@@ -149,7 +164,9 @@
   </a>
 </div>
 
-<p class="sect" style="margin-top:.2rem">Two hours each. Both open in Zoom — if you're asked for a passcode, email me.</p>
+<p class="sect" style="margin:.2rem 0 0">Two hours each. Both open in Zoom — if you're asked for a passcode, email me.</p>
+</div>
+</details>
 
 <h2>The three things</h2>
 <p class="sect">If you remember nothing else.</p>
